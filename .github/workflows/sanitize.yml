@@ -1,65 +1,12 @@
-name: Sanitization automation
+name: Run sanitization checks
 
-on: [pull_request]
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
 
 jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    name: sanitize
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-
-      - name: Run pre-commit checks on delta changes
-        id: pre-commit-delta
-        uses: pre-commit/action@v3.0.0
-        with:
-          extra_args: -v --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}
-
-      - name: add-pre-commit-comment
-        id: comment
-        uses: actions/github-script@v6
-        if: ${{ github.event_name == 'pull_request' &&  always() }}
-        with:
-          script: |
-            const pr = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            };
-            const {data: reviews} = await github.rest.pulls.listReviews(pr);
-            let review = reviews.find(review => {
-              return (
-                (review?.user?.login ?? '') == 'github-actions[bot]' &&
-                (review?.body ?? '').startsWith('#### Pre commit checks')
-              )
-            });
-            const precommitstep = "4:1";
-            const list = await github.rest.actions.listJobsForWorkflowRun({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.runId,
-            });
-            const output = `#### Pre commit checks 📖 \`${{ steps.pre-commit-delta.outcome }}\`
-
-            <a href="`+list.data.jobs[0].html_url+`#step:`+precommitstep+`">Link to Precommit check run output</a>
-
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
-
-            if (review === undefined) {
-              github.rest.pulls.createReview({
-                ...pr,
-                body: output,
-                event: "COMMENT",
-              });
-            } else {
-              github.rest.pulls.updateReview({
-                ...pr,
-                body: output,
-                review_id: review.id
-              });
-            }
+  sanitize-checks:
+    uses: 101digital/gh-actions/.github/workflows/sanitize-checks-java.yml@master
