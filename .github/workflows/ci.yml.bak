@@ -1,4 +1,4 @@
-name: transaction-processing-service-pipeline
+name: XXSERVICENAMEXX-pipeline
 
 # Do not change any of these settings.
 on:
