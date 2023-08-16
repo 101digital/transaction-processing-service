@@ -1,0 +1,14 @@
+image:
+  tag: 1.0.0-SNAPSHOT
+kubernetes:
+  protocol: HTTPS
+server:
+  ssl:
+    enabled: true
+spring:
+  profiles:
+    active: adb-dev
+  cloud:
+    config:
+      uri: http://configuration-service.adb:8080/
+      label: develop

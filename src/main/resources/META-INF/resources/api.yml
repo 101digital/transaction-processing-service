@@ -1,0 +1,104 @@
+openapi: 3.0.1
+info:
+  title: Schedule Payment Service
+  version: 1.0.0
+  description: When making Payments, Users are typically presented with options to make those payments at a future date and / or make those payments at regular intervals. The role of the Scheduled Payment Service is to support these capabilities - Future Dated Payments and Recurring Payments. In addition, the Scheduled Payment Service also supports Bulk Payments (or Batch Payments). A typical use case is monthly Payroll Payments that are processed on behalf of Business / Corporate banking Customers.
+  x-custom-info:
+    authors:
+      name: Dasun Anushka
+      email: lakmal.thanthrige@101digital.io
+servers:
+  - url: 'http://localhost:8090'
+paths:
+  /test:
+    get:
+      tags:
+        - test endpoint
+      summary: test
+      description: test
+      operationId: testEndpoint
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResponse'
+        503:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Data Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Input data is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+                
+#-----
+components:
+  schemas:
+    TestResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Test'
+        paging:
+          $ref: '#/components/schemas/PagingInformation'
+    Test:
+      type: object
+      properties:
+        name:
+          type: string
+    PagingInformation:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          description: Number of total records in the response.
+          format: int64
+          example: 100
+        pageNumber:
+          type: integer
+          description: The page number to return (starting at page 1).
+          format: int32
+          example: 1
+        pageSize:
+          type: integer
+          description: The number of records to return in a single request
+          format: int32
+          example: 10
+    ErrorResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Internal error code identification of the platform
+          example: 090.04.500.01
+        message:
+          type: string
+          description: Internal error message of the platform
+          example: 'Error occurred while processing your request. Please try again later'

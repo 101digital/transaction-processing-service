@@ -1,0 +1,165 @@
+spring:
+  application:
+    name: transaction-processing-service
+    id: 161
+    entity-id: ADB
+  mvc:
+    throw-exception-if-no-handler-found: false
+  web:
+    resources:
+      add-mappings: true
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob.non_contextual_creation: true
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    username: postgres
+    password: root
+    url: jdbc:postgresql://localhost:5432/schedule_payment_db
+    driverClassName: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/liquibase/liquibase-changelog.xml
+
+jwt:
+  enabled: true
+  exclude-api-paths: /v3/api-docs.yaml,/swagger-ui,/actuator,/error,/v2,/swagger,/webjars
+  default-membership-id: c9e3c400-640b-11ea-bc55-0242ac130003
+  default-membership-role: SuperAdmin
+  ignore-check: true
+  header-name: X-JWT-Assertion
+  providers:
+    - issuer: wso2.org/products/am
+      secret: lSGznpPgmBOY4rzD4dKV6yVt1zVdYkDNqciolbi4fRI=
+      jwtUserType: APPLICATION_USER
+      jwtAppType: APPLICATION
+      expiry: 60
+      verifySecret: false
+      issuerClaim: iss
+      userTypeClaim: http://wso2.org/claims/usertype
+      userIdClaim: http://wso2.org/claims/userid
+      orgIdClaim: http://wso2.org/claims/identity/organisationId
+      entityIdClaim: http://wso2.org/claims/entityId
+      appIdClaim: http://wso2.org/claims/applicationname
+      roleClaim: http://wso2.org/claims/role
+      permissionClaim: http://wso2.org/claims/permissions
+      subscriberClaim: http://wso2.org/claims/subscriber
+    - issuer: 101D
+      secret: 2N+Pd5jwo/UXksl/EsDncl3Y7H0M7OQ/FzkvZ5o0MuM=
+      jwtUserType: APPLICATION_USER
+      jwtAppType: APPLICATION
+      expiry: 60
+      verifySecret: true
+      issuerClaim: iss
+      userTypeClaim: http://wso2.org/claims/usertype
+      userIdClaim: http://wso2.org/claims/enduser
+      orgIdClaim: http://wso2.org/claims/identity/organisationId
+      entityIdClaim: http://wso2.org/claims/entityId
+      appIdClaim: http://wso2.org/claims/applicationname
+      roleClaim: http://wso2.org/claims/role
+      permissionClaim: http://wso2.org/claims/permission
+      subscriberClaim: http://wso2.org/claims/subscriber
+
+logging.level:
+  root: INFO
+  io.marketplace: TRACE
+
+pxchange:
+  enabled: true
+  entity-id: ADB
+
+kafka:
+  server: localhost:9092
+  enabled: true
+  brokers: localhost:9092
+  group-id: ${spring.application.name}
+  security:
+    protocol: PLAINTEXT
+  consumer:
+    groupid: ${spring.application.name}
+  topics:
+    scheduled-payment-start: scheduled-payment-start
+    wallet-data-changed: wallet-data-changed
+
+management.health.db.enabled: false
+management.health.redis.enabled: false
+
+# Cache config
+cache:
+  enabled: true
+
+# Setting for Membership Service
+membership.server.base-url: http://membership-service:8080
+
+# Setting for Wallet Service
+wallet.service.base-url: http://wallet-service:8080
+
+# Setting for Account Opening Service
+account-opening-service:
+  base-url: http://account-opening-service:8080
+
+# Setting for Payment Service
+payment-service:
+  base-url: http://payment-service:8080
+  initiate-payment-endpoint: /payments
+  confirm-payment-endpoint: /payments/{paymentId}
+
+# Setting for Bank Information Service
+bank-information-service:
+  base-url: http://bank-information-service:8080
+  get-banks-endpoint: /banks
+
+# Setting for Contact Service
+contact-service:
+  base-url: http://contact-service:8080
+  lookup-beneficiary-endpoint: /beneficiaries/{type}/{identification}
+
+# Setting for sequence configuration
+sequence-id-config:
+  schedule-payment: 612dd073-6a35-416b-8739-5cde95bdc32a
+  schedule-payment-item: 5dd9777a-5b6d-4fa9-b28c-6a002983a5b7
+
+# Scheduled payment configuration
+scheduled-payment-config:
+  process-batch-size: 5
+  accept-effective-date-from-job: false
+  transaction-time-zone: Asia/Kuala_Lumpur
+  dry-run-mode: false # dry run mode but not to process it.
+  savings-pot-product-id: SavingsPot-i
+
+# Mock Configuration
+mock-config:
+  enable-schedule-payment-mock-response: false
+  enable-recurring-payment-mock-response: false
+
+# Notification Async Configuration
+notification:
+  async:
+    enabled: true
+
+app-config:
+  defaultPageNumber: 1
+  defaultPageSize: 10
+  server:
+    timezone: UTC
+
+# fnx payment notification configuration
+fnx-payment:
+  notification:
+    limit-check-reject-template-name: payment-limit-check-reject
+    insufficient-balance-reject-template-name: payment-insufficient-balance-reject
+
+logging.level.org.apache.http.wire: TRACE
+
+local-instruments: DuitNow,DuitNowID,DuitNowQR,IntraBankTransfer
+
+skip-stepup-local-instruments: IntraBankTransfer
+
+
+encryption:
+  zip:
+    password: "A04w%%^B&p1Y"
+  provider: ZIP

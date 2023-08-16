@@ -1,0 +1,49 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+  <changeSet id="createTableConfiguration" author="pamitha">
+    <createTable tableName="configuration">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="type" type="uuid">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="wallet" type="varchar(255)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="created_by" type="uuid"/>
+      <column name="created_at" type="timestamp">
+      </column>
+      <column name="updated_by" type="uuid"/>
+      <column name="updated_at" type="timestamp"/>
+       <column name="send_notification" type="bool">
+        <constraints nullable="false"/>
+      </column>
+      
+    </createTable>
+  </changeSet>
+
+  <changeSet id="createTableConfigurationParam" author="pamitha">
+    <createTable tableName="configuration_param">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="configuration_id" type="uuid">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="param_name" type="varchar(255)"/>
+      <column name="value" type="varchar(255)"/>
+    </createTable>
+  </changeSet>
+  
+  <changeSet id="addReprocessRequestForeignKeyConstraint" author="pamitha">
+    <addForeignKeyConstraint baseTableName="configuration_param"
+      baseColumnNames="configuration_id"
+      referencedTableName="configuration"
+      referencedColumnNames="id"
+      constraintName="configuration_param_configuration_id_fk"/>
+  </changeSet>
+</databaseChangeLog>

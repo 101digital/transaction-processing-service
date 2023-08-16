@@ -1,0 +1,79 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual Sonarqube Scan
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      java-version:
+        description: |
+          The version of the Java that is use to build the application
+        required: false
+        type: string
+        default: 17
+      branch:
+        description: |
+          Branch to be scanned
+        required: false
+        type: string 
+        default: master
+      multi-modules:
+        required: false
+        type: boolean
+        default: false
+      maven-settings:
+        description: |
+          URL to download maven-settings.xml
+          Should be located in a repository within github.acsdigital.com.my 
+        required: false
+        type: string
+        default: https://raw.github.acsdigital.dev/adb/workflows/main/maven-settings.xml
+      project-key:
+        description: |
+          Project key to be used for SonarQube scans and report generation
+          Not required if sonar.projectKey is declared in pom.xml <properties>
+        required: false
+        type: string
+
+
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  analyze:
+      name: Build and analyze
+      runs-on: [self-hosted, linux]
+      permissions:
+        contents: read
+      env:
+        GITHUB_ACTOR: ${{ secrets.UPLOAD_ARTIFACT_USER }}
+        GITHUB_TOKEN: ${{ secrets.UPLOAD_ARTIFACT_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        OW_NEXUS_REPO_USER: ${{ secrets.OW_NEXUS_REPO_USER }}
+        OW_NEXUS_REPO_PW: ${{ secrets.OW_NEXUS_REPO_PW }}
+      container:
+        image: maven:3.8.7-eclipse-temurin-${{ inputs.java-version }}-alpine
+      steps:
+        # This step is needed as a workaround for checkout action.
+        # .git folder will not be present if the container without installing GIT first.
+        - name: Install GIT
+          run: apk add git
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ inputs.branch }}
+        - name: Build and analyze (uses project-key passed in workflow)
+          if: "${{ inputs.project-key != '' }}"
+          run: |
+            curl -H 'Authorization: token ${{ secrets.UPLOAD_ARTIFACT_TOKEN }}' -o maven-settings.xml ${{ inputs.maven-settings }}
+            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ inputs.project-key }} -Dgit.commit.id.abbrev=${{ github.sha }} -s maven-settings.xml 
+        - name: Build and analyze (uses sonar.projectKey property from pom.xml)
+          if: "${{ inputs.project-key == '' }}"
+          run: |
+            curl -H 'Authorization: token ${{ secrets.UPLOAD_ARTIFACT_TOKEN }}' -o maven-settings.xml ${{ inputs.maven-settings }}
+            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dgit.commit.id.abbrev=${{ github.sha }} -s maven-settings.xml

@@ -1,0 +1,41 @@
+name: Transaction Processing Service pipeline
+
+# Do not change any of these settings.
+on:
+  workflow_dispatch:
+    inputs:
+      java-version:
+        description: |
+          The version of the Java that is use to build the application
+        required: false
+        type: string
+        default: 17
+      multi-modules:
+        required: false
+        type: boolean
+        default: false
+      env:
+        required: true
+        type: string
+        default: stg
+      sonar-required:
+        required: true
+        type: boolean
+        default: true
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  pipeline:
+    permissions:
+      contents: read
+      packages: write
+    uses: adb/workflows/.github/workflows/java-backend-pipeline.yml@helm-migration
+    with:
+      java-version: ${{inputs.java-version}}
+      multi-modules: ${{inputs.multi-modules}}
+      env: ${{inputs.env}}
+      sonar-required: ${{inputs.sonar-required}}
+    secrets: inherit
