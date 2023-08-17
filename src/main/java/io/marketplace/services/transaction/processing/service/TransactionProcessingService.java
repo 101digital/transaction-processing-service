@@ -1,6 +1,7 @@
 package io.marketplace.services.transaction.processing.service;
 
 import io.marketplace.commons.exception.ApiResponseException;
+import io.marketplace.commons.exception.InternalServerErrorException;
 import io.marketplace.services.transaction.processing.common.ErrorCodes;
 import io.marketplace.services.transaction.processing.entity.ConfigurationEntity;
 import io.marketplace.services.transaction.processing.entity.ConfigurationParamEntity;
@@ -67,17 +68,15 @@ public class TransactionProcessingService {
             eventTrackingService.traceError(
                     UseCase.ADD_CONFIGURATION,
                     EventCode.ADD_CONFIGURATION_EVENT_CODE,
-                    "",
-                    "",
+                    ErrorCodes.ERROR_WHILE_ADD_CONFIGURATIONS.getCode(),
+                    ErrorCodes.ERROR_WHILE_ADD_CONFIGURATIONS.getMessage(),
                     businessId,
                     exception);
 
-            throw ApiResponseException.builder()
-                    .code(ErrorCodes.ERROR_WHILE_ADD_CONFIGURATIONS.getCode())
-                    .message(ErrorCodes.ERROR_WHILE_ADD_CONFIGURATIONS.getMessage())
-                    .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .throwable(exception)
-                    .build();
+            throw new InternalServerErrorException(
+                    ErrorCodes.ERROR_WHILE_ADD_CONFIGURATIONS.getCode(),
+                    ErrorCodes.ERROR_WHILE_ADD_CONFIGURATIONS.getMessage(),
+                    businessId);
         }
     }
 }

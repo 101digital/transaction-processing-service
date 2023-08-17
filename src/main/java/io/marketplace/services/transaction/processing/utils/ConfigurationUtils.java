@@ -2,6 +2,7 @@ package io.marketplace.services.transaction.processing.utils;
 
 import com.google.gson.Gson;
 import io.marketplace.commons.exception.ApiResponseException;
+import io.marketplace.commons.exception.BadRequestException;
 import io.marketplace.commons.utils.MembershipUtils;
 import io.marketplace.services.transaction.processing.common.ErrorCodes;
 import io.marketplace.services.transaction.processing.entity.ConfigurationEntity;
@@ -40,41 +41,43 @@ public class ConfigurationUtils {
 
     public void validateConfiguration(Configurations configurations) {
 
-        String type = Optional.ofNullable(configurations).map(Configurations::getType).orElse("");
+        String businessId = String.format("Configuration: %s",configurations);
+
+        String type = Optional.ofNullable(configurations).map(Configurations::getType).orElse(businessId);
 
         if (StringUtils.isEmpty(type)) {
-            throw ApiResponseException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST.value())
-                    .message(ErrorCodes.MISSING_CONFIGURATION_TYPE.getMessage())
-                    .code(ErrorCodes.MISSING_CONFIGURATION_TYPE.getCode())
-                    .build();
+
+            throw new BadRequestException(
+                    ErrorCodes.MISSING_CONFIGURATION_TYPE.getCode(),
+                    ErrorCodes.MISSING_CONFIGURATION_TYPE.getMessage(),
+                    businessId);
         }
 
         if (!configurationTypes.contains(type)) {
-            throw ApiResponseException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST.value())
-                    .message(ErrorCodes.INVALID_CONFIGURATION_TYPE.getMessage())
-                    .code(ErrorCodes.INVALID_CONFIGURATION_TYPE.getCode())
-                    .build();
+
+            throw new BadRequestException(
+                    ErrorCodes.INVALID_CONFIGURATION_TYPE.getCode(),
+                    ErrorCodes.INVALID_CONFIGURATION_TYPE.getMessage(),
+                    businessId);
         }
 
         String logicCode =
-                Optional.ofNullable(configurations).map(Configurations::getLogicCode).orElse("");
+                Optional.ofNullable(configurations).map(Configurations::getLogicCode).orElse(businessId);
 
         if (StringUtils.isEmpty(logicCode)) {
-            throw ApiResponseException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST.value())
-                    .message(ErrorCodes.MISSING_CONFIGURATION_LOGIC_CODE.getMessage())
-                    .code(ErrorCodes.MISSING_CONFIGURATION_LOGIC_CODE.getCode())
-                    .build();
+
+            throw new BadRequestException(
+                    ErrorCodes.MISSING_CONFIGURATION_LOGIC_CODE.getCode(),
+                    ErrorCodes.MISSING_CONFIGURATION_LOGIC_CODE.getMessage(),
+                    businessId);
         }
 
         if (!configurationLogicCodes.contains(logicCode)) {
-            throw ApiResponseException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST.value())
-                    .message(ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getMessage())
-                    .code(ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getCode())
-                    .build();
+
+            throw new BadRequestException(
+                    ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getCode(),
+                    ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getMessage(),
+                    businessId);
         }
 
         Optional<ConfigurationEntity> configurationEntity =
@@ -82,11 +85,11 @@ public class ConfigurationUtils {
                         configurations.getType(), configurations.getWalletId());
 
         if (configurationEntity.isPresent()) {
-            throw ApiResponseException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST.value())
-                    .message(ErrorCodes.ALREADY_CONFIGURATION_CREATED.getMessage())
-                    .code(ErrorCodes.ALREADY_CONFIGURATION_CREATED.getCode())
-                    .build();
+
+            throw new BadRequestException(
+                    ErrorCodes.ALREADY_CONFIGURATION_CREATED.getCode(),
+                    ErrorCodes.ALREADY_CONFIGURATION_CREATED.getMessage(),
+                    businessId);
         }
     }
 
@@ -106,7 +109,6 @@ public class ConfigurationUtils {
 
     public List<ConfigurationParamEntity> toConfigurationParamEntity(
             Object supplementaryData, UUID configurationId) {
-
 
         Map<String, String> data = gson.fromJson(gson.toJson(supplementaryData), Map.class);
 
