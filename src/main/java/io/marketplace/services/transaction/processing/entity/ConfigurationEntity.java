@@ -9,8 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -34,10 +32,13 @@ public class ConfigurationEntity {
     private UUID id;
     
     @Column(name = "type", nullable = false)
-    private UUID type;
+    private String type;
 
     @Column(name = "wallet", nullable = false)
     private String wallet;
+    
+    @Column(name = "logic_code", nullable = false)
+    private String logicCode;
     
     @Column(name = "created_by")
     private UUID createdBy;
