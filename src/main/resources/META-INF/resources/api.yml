@@ -53,7 +53,7 @@ paths:
       operationId: addConfigurations
       summary: Create configurations
       tags:
-        - RC Configurations
+        - Configurations
       requestBody:
         required: true
         content:

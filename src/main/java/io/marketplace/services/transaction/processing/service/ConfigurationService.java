@@ -1,6 +1,5 @@
 package io.marketplace.services.transaction.processing.service;
 
-import io.marketplace.commons.exception.ApiResponseException;
 import io.marketplace.commons.exception.InternalServerErrorException;
 import io.marketplace.services.transaction.processing.common.ErrorCodes;
 import io.marketplace.services.transaction.processing.entity.ConfigurationEntity;
@@ -16,11 +15,10 @@ import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 import io.marketplace.services.transaction.processing.utils.EventTrackingService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TransactionProcessingService {
+public class ConfigurationService {
 
     @Autowired private ConfigurationRepository configurationRepository;
 
