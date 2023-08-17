@@ -18,20 +18,20 @@ spec:
                 configMapKeyRef:
                   name: transaction-processing-service-db-config
                   key: config.json
-          { { if .Values.server.ssl.enabled } }
+          {{ if .Values.server.ssl.enabled }}
           volumeMounts:
             - mountPath: /apps/conf/keystore.jks
               name: tomcat-ssl
               subPath: keystore.jks
-          { { end } }
+          {{ end }}
       restartPolicy: Never
-      { { if .Values.server.ssl.enabled } }
+      {{ if .Values.server.ssl.enabled }}
       volumes:
         - name: tomcat-ssl
           secret:
             defaultMode: 420
             secretName: tomcat-ssl
-      { { end } }
+      {{ end }}
       {{ if .Values.kubernetes.useSecrets }}
       imagePullSecrets:
         - name: {{ .Values.kubernetes.imagePullSecrets }}
