@@ -20,8 +20,8 @@ public class ConfigurationParamEntity {
 	private UUID id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "configuration_id", nullable = false)
-	private ConfigurationEntity configuration;
+	@JoinColumn(name = "configuration_id", referencedColumnName = "id", nullable = false)
+	private ConfigurationEntity configurationId;
 
 	@Column(name = "param_name")
 	private String paramName;

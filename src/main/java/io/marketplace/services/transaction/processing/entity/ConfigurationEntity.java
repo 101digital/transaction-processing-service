@@ -1,13 +1,17 @@
 package io.marketplace.services.transaction.processing.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -50,4 +54,6 @@ public class ConfigurationEntity {
     @Column(name = "send_notification", nullable = false)
     private boolean sendNotification;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "configurationId", fetch = FetchType.LAZY)
+    private List<ConfigurationParamEntity> configurationParamList;
 }
