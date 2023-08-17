@@ -9,4 +9,5 @@ import io.marketplace.services.transaction.processing.entity.ConfigurationEntity
 public interface ConfigurationRepository extends JpaRepository<ConfigurationEntity, UUID> {
 
 	Optional<ConfigurationEntity> findById(UUID id);
+    Optional<ConfigurationEntity> findByTypeAndWallet(String type, String wallet);
 }
