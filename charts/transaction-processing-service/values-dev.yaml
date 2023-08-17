@@ -11,5 +11,5 @@ spring:
     active: adb-dev
   cloud:
     config:
-      uri: http://configuration-service.adb:8080/
+      uri: http://configuration-service:8080/
       label: develop
