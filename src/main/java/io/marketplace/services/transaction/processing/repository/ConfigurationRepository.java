@@ -10,4 +10,5 @@ public interface ConfigurationRepository extends JpaRepository<ConfigurationEnti
 
 	Optional<ConfigurationEntity> findById(UUID id);
     Optional<ConfigurationEntity> findByTypeAndWallet(String type, String wallet);
+    Optional<ConfigurationEntity> findBywallet(String wallet);
 }

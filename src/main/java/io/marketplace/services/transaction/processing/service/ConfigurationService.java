@@ -96,13 +96,14 @@ public class ConfigurationService {
                 EventTitle.DELETE_CONFIGURATION_REQUEST,
                 businessId,
                 configurationId);
+		
+		Optional<ConfigurationEntity> optConfig = configurationRepository.findById(UUID.fromString(configurationId));
+		if(!optConfig.isPresent()) {
+			throw new NotFoundException(
+            		ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getCode(), ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getMessage(), configurationId);
+		}
+		
 		try {
-			Optional<ConfigurationEntity> optConfig = configurationRepository.findById(UUID.fromString(configurationId));
-			if(!optConfig.isPresent()) {
-				throw new NotFoundException(
-	            		ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getCode(), ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getMessage(), configurationId);
-			}
-			
 			configurationRepository.deleteById(UUID.fromString(configurationId));
 			
 			eventTrackingService.traceEvent(
