@@ -9,7 +9,9 @@ public class Constants {
     @UtilityClass
     public static class EventTitle {
         public static final String ADD_CONFIGURATION_REQUEST = "Add Configuration Request";
-        public static final String ADD_CONFIGURATION_RESPONSE = "Add Configuration Request";
+        public static final String ADD_CONFIGURATION_RESPONSE = "Add Configuration Respone";
+        public static final String DELETE_CONFIGURATION_REQUEST = "Delete Configuration Request";
+        public static final String DELETE_CONFIGURATION_RESPONSE = "Delete Configuration Respone";
 
     }
 
@@ -18,6 +20,7 @@ public class Constants {
     public static class UseCase {
 
         public static final String ADD_CONFIGURATION = "Add Configuration";
+        public static final String DELETE_CONFIGURATION = "Delete Configuration";
 
     }
 
@@ -29,7 +32,8 @@ public class Constants {
         public static final String KAFKA_PUSH_SUCCESS = ".KAFKA-PUSH-SUCCESS";
         public static final String KAFKA_PUSH_FAILED = ".KAFKA-PUSH-FAILED";
 
-        public static final String ADD_CONFIGURATION_EVENT_CODE = "POST.ADD.CONFIGURATION";
+        public static final String ADD_CONFIGURATION_EVENT_CODE = "POST.CONFIGURATION";
+        public static final String DELETE_CONFIGURATION_EVENT_CODE = "DELETE.CONFIGURATION";
 
 
     }
@@ -38,6 +42,7 @@ public class Constants {
     public static final class Permissions {
 
         public static final String ADD_CONFIGURATION_PERMISSION = "POST_CONFIGURATION";
+        public static final String DELETE_CONFIGURATION_PERMISSION = "DELETE_CONFIGURATION";
 
     }
 }

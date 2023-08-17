@@ -17,4 +17,10 @@ public class ConfigurationsApiDelegateImpl implements ConfigurationsApiDelegate 
 
         return ResponseEntity.ok().body(configurationService.addConfigurations(configurations));
     }
+    
+    @Override
+	public ResponseEntity<String> deleteConfigurationById(String configurationId) {
+    	configurationService.deleteConfigurationById(configurationId);
+		return ResponseEntity.noContent().build();
+	}
 }
