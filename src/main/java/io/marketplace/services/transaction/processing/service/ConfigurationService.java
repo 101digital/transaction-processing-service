@@ -70,6 +70,7 @@ public class ConfigurationService {
             return configurationUtils.toConfigurationResponse(configurationEntity);
 
         } catch (Exception exception) {
+        	log.error(ErrorCodes.ERROR_WHILE_ADD_CONFIGURATIONS.getMessage(), exception);
             eventTrackingService.traceError(
                     UseCase.ADD_CONFIGURATION,
                     EventCode.ADD_CONFIGURATION_EVENT_CODE,

@@ -32,8 +32,8 @@ public class Constants {
         public static final String KAFKA_PUSH_SUCCESS = ".KAFKA-PUSH-SUCCESS";
         public static final String KAFKA_PUSH_FAILED = ".KAFKA-PUSH-FAILED";
 
-        public static final String ADD_CONFIGURATION_EVENT_CODE = "POST.ADD.CONFIGURATION";
-        public static final String DELETE_CONFIGURATION_EVENT_CODE = "POST.DELETE.CONFIGURATION";
+        public static final String ADD_CONFIGURATION_EVENT_CODE = "POST.CONFIGURATION";
+        public static final String DELETE_CONFIGURATION_EVENT_CODE = "DELETE.CONFIGURATION";
 
 
     }
