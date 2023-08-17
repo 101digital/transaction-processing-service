@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ${SPRING_CONFIG_PROFILE:}
+    active: ${SPRING_CONFIG_PROFILE:local}
   cloud:
     config:
       enabled: ${SPRING_CONFIG_ENABLED:false}
@@ -8,7 +8,7 @@ spring:
       failFast: true
       overrideNone: false
       overrideSystemProperties: false
-      uri: ${SPRING_CONFIG_PATH:http://local.conf.101digital.io:8888}
+      uri: ${SPRING_CONFIG_PATH:http://configurations.101digital.io:8888}
       label: ${SPRING_CONFIG_LABEL:master}
 encrypt:
     failOnError: true
