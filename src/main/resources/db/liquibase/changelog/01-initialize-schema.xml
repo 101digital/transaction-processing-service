@@ -8,10 +8,11 @@
       <column name="id" type="uuid">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="type" type="uuid">
+      <column name="type" type="varchar(255)">
         <constraints unique="true" nullable="false"/>
       </column>
-      <column name="wallet" type="varchar(255)">
+      <column name="logic_code" type="varchar(255)"/>
+      <column name="wallet" type="uuid">
         <constraints unique="true" nullable="false"/>
       </column>
       <column name="created_by" type="uuid"/>
