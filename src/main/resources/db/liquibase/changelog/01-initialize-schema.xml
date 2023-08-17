@@ -15,6 +15,7 @@
       <column name="wallet" type="uuid">
         <constraints unique="true" nullable="false"/>
       </column>
+      <column name="logic_code" type="varchar(255)"/>
       <column name="created_by" type="uuid"/>
       <column name="created_at" type="timestamp">
       </column>
