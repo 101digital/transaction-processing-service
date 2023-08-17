@@ -1,4 +1,4 @@
-name: Transaction Processing Service pipeline
+name: transaction-processing-service-pipeline
 
 # Do not change any of these settings.
 on:
@@ -10,18 +10,24 @@ on:
         required: false
         type: string
         default: 17
-      multi-modules:
-        required: false
-        type: boolean
-        default: false
       env:
         required: true
         type: string
-        default: stg
+        default: dev
       sonar-required:
         required: true
-        type: boolean
-        default: true
+        type: string
+        default: false
+      bump-level:
+        required: false
+        description: bump type [ major, minor, patch ]
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - ntg
+        default: ntg
   push:
     branches: [ "main", "develop" ]
   pull_request:
@@ -32,10 +38,10 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: adb/workflows/.github/workflows/java-backend-pipeline.yml@helm-migration
+    uses: adb/workflows/.github/workflows/java-backend-pipeline.yml@feature/semver-bump-test
     with:
       java-version: ${{inputs.java-version}}
-      multi-modules: ${{inputs.multi-modules}}
-      env: ${{inputs.env}}
-      sonar-required: ${{inputs.sonar-required}}
+      env: ${{ github.event_name != 'workflow_dispatch' && 'stg' || inputs.env }}
+      sonar-required: ${{ github.event_name != 'workflow_dispatch' && 'true' || inputs.sonar-required }}
+      bump-level: ${{ inputs.bump-level }}
     secrets: inherit
