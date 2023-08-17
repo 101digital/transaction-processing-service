@@ -41,9 +41,10 @@ public class ConfigurationUtils {
 
     public void validateConfiguration(Configurations configurations) {
 
-        String businessId = String.format("Configuration: %s",configurations);
+        String businessId = String.format("Configuration: %s", configurations);
 
-        String type = Optional.ofNullable(configurations).map(Configurations::getType).orElse(businessId);
+        String type =
+                Optional.ofNullable(configurations).map(Configurations::getType).orElse("");
 
         if (StringUtils.isEmpty(type)) {
 
@@ -62,7 +63,9 @@ public class ConfigurationUtils {
         }
 
         String logicCode =
-                Optional.ofNullable(configurations).map(Configurations::getLogicCode).orElse(businessId);
+                Optional.ofNullable(configurations)
+                        .map(Configurations::getLogicCode)
+                        .orElse("");
 
         if (StringUtils.isEmpty(logicCode)) {
 
@@ -82,7 +85,10 @@ public class ConfigurationUtils {
 
         Optional<ConfigurationEntity> configurationEntity =
                 configurationRepository.findByTypeAndWallet(
-                        configurations.getType(), configurations.getWalletId());
+                        Optional.ofNullable(configurations).map(Configurations::getType).orElse(""),
+                        Optional.ofNullable(configurations)
+                                .map(Configurations::getWalletId)
+                                .orElse(""));
 
         if (configurationEntity.isPresent()) {
 
