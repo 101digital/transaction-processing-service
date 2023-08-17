@@ -102,7 +102,7 @@ metadata:
     'prometheus.io/path': '/actuator/prometheus'
   labels:
     app.kubernetes.io/instance: transaction-processing-service
-  name: transaction-processing-api-service
+  name: transaction-processing-service
 spec:
   selector:
     app: transaction-processing-service
