@@ -12,4 +12,4 @@ spring:
   cloud:
     config:
       uri: http://configuration-service:8080/
-      label: develop
+      label: main
