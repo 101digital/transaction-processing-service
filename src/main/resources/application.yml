@@ -32,7 +32,7 @@ jwt:
   ignore-check: true
   header-name: X-JWT-Assertion
   providers:
-    - issuer: 101D
+    - issuer: internal
       secret: 2N+Pd5jwo/UXksl/EsDncl3Y7H0M7OQ/FzkvZ5o0MuM=
       jwtUserType: APPLICATION_USER
       jwtAppType: APPLICATION
