@@ -11,6 +11,8 @@ import io.marketplace.commons.utils.ThreadContextUtils;
 import io.marketplace.services.pxchange.client.service.PXChangeServiceClient;
 import io.marketplace.services.transaction.processing.dto.Wallet;
 import io.marketplace.services.transaction.processing.entity.ConfigurationEntity;
+import io.marketplace.services.transaction.processing.entity.ConfigurationParamEntity;
+import io.marketplace.services.transaction.processing.repository.ConfigurationParamRepository;
 import io.marketplace.services.transaction.processing.repository.ConfigurationRepository;
 import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
 import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
@@ -23,6 +25,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,15 +44,20 @@ public class WalletDataChangedConsumer {
     @Value("${transaction-processing-config.savings-pot-product-id:SavingsPot-i}")
     private String savingPotProductId;
     
+    @Value("${transaction-processing-config.contribution-param-name:contributionWalletId}")
+    private String contributionWalletId;
+    
     @Autowired private PXChangeServiceClient pxClient;
 
     @Autowired private EventMessageUtils eventMessageUtil;
     
     @Autowired private ConfigurationRepository configurationRepository;
     
+    @Autowired private ConfigurationParamRepository configurationParamRepository;
+    
     @KafkaListener(
             topics = "${kafka.topics.wallet-data-changed:wallet-data-changed}",
-            groupId = "${kafka.group-id:transaction-processing-group}",
+            groupId = "${kafka.group-id:transaction-processing-service}",
             containerFactory = "kafkaListenerContainerFactory")
     public void listenWalletDataChangedEvent(@Payload String message) {
     	try {
@@ -114,14 +122,18 @@ public class WalletDataChangedConsumer {
     }
     
     private void processTransactionProcessing(Wallet wallet) {
-    	Optional<ConfigurationEntity> optConfig = configurationRepository.findBywallet(wallet.getWalletId());
-    	if(optConfig.isPresent()) {
-    		EventMessage<Object> event = buildEvent(wallet);
-            pxClient.addEvent(event);
-    		UUID configurationId = optConfig.get().getId();
-    		log.info("Terminating round up contribution: {}", configurationId);
-    		configurationRepository.deleteById(configurationId);
-    	}
+    	List<ConfigurationParamEntity> configurationParamList = configurationParamRepository.findByParamNameAndValue(contributionWalletId,wallet.getWalletId());
+    	
+    	configurationParamList.forEach(configurationParamEntity -> {
+    		Optional<ConfigurationEntity> optConfig = configurationRepository.findById(configurationParamEntity.getConfigurationId());
+    		if(optConfig.isPresent()) {
+        		EventMessage<Object> event = buildEvent(wallet);
+                pxClient.addEvent(event);
+        		UUID configurationId = optConfig.get().getId();
+        		log.info("Terminating round up contribution: {}", configurationId);
+        		configurationRepository.deleteById(configurationId);
+        	}
+    	});
     }
     
     private EventMessage<Object> buildEvent(Wallet wallet) {
