@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ConfigurationService {
@@ -86,6 +87,7 @@ public class ConfigurationService {
         }
     }
     
+    @Transactional
     public void deleteConfigurationById(String configurationId) {
     	
     	String businessId = String.format("Configuration Id: %s", configurationId);
@@ -96,13 +98,14 @@ public class ConfigurationService {
                 EventTitle.DELETE_CONFIGURATION_REQUEST,
                 businessId,
                 configurationId);
+		
+		Optional<ConfigurationEntity> optConfig = configurationRepository.findById(UUID.fromString(configurationId));
+		if(!optConfig.isPresent()) {
+			throw new NotFoundException(
+            		ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getCode(), ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getMessage(), configurationId);
+		}
+		
 		try {
-			Optional<ConfigurationEntity> optConfig = configurationRepository.findById(UUID.fromString(configurationId));
-			if(!optConfig.isPresent()) {
-				throw new NotFoundException(
-	            		ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getCode(), ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getMessage(), configurationId);
-			}
-			
 			configurationRepository.deleteById(UUID.fromString(configurationId));
 			
 			eventTrackingService.traceEvent(

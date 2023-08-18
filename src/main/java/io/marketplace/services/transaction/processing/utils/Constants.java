@@ -21,6 +21,7 @@ public class Constants {
 
         public static final String ADD_CONFIGURATION = "Add Configuration";
         public static final String DELETE_CONFIGURATION = "Delete Configuration";
+        public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "Receive Wallet data changed from Kafka";
 
     }
 
@@ -34,6 +35,9 @@ public class Constants {
 
         public static final String ADD_CONFIGURATION_EVENT_CODE = "POST.CONFIGURATION";
         public static final String DELETE_CONFIGURATION_EVENT_CODE = "DELETE.CONFIGURATION";
+        
+        public static final String WALLET_CLOSED = "WALLET.CLOSED";
+        public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "RECEIVE.WALLET.DATA.CHANGED.FROM.KAFKA";
 
 
     }
