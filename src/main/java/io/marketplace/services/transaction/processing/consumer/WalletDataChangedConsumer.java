@@ -14,6 +14,7 @@ import io.marketplace.services.transaction.processing.entity.ConfigurationEntity
 import io.marketplace.services.transaction.processing.entity.ConfigurationParamEntity;
 import io.marketplace.services.transaction.processing.repository.ConfigurationParamRepository;
 import io.marketplace.services.transaction.processing.repository.ConfigurationRepository;
+import io.marketplace.services.transaction.processing.service.ConfigurationService;
 import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
 import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 
@@ -51,7 +52,7 @@ public class WalletDataChangedConsumer {
 
     @Autowired private EventMessageUtils eventMessageUtil;
     
-    @Autowired private ConfigurationRepository configurationRepository;
+    @Autowired private ConfigurationService configurationService;
     
     @Autowired private ConfigurationParamRepository configurationParamRepository;
     
@@ -125,28 +126,8 @@ public class WalletDataChangedConsumer {
     	List<ConfigurationParamEntity> configurationParamList = configurationParamRepository.findByParamNameAndValue(contributionWalletId,wallet.getWalletId());
     	
     	configurationParamList.forEach(configurationParamEntity -> {
-    		Optional<ConfigurationEntity> optConfig = configurationRepository.findById(configurationParamEntity.getConfigurationId());
-    		if(optConfig.isPresent()) {
-        		EventMessage<Object> event = buildEvent(wallet);
-                pxClient.addEvent(event);
-        		UUID configurationId = optConfig.get().getId();
-        		log.info("Terminating round up contribution: {}", configurationId);
-        		configurationRepository.deleteById(configurationId);
-        	}
+    		configurationService.deleteConfigurationById(configurationParamEntity.getConfigurationId().toString());
     	});
-    }
-    
-    private EventMessage<Object> buildEvent(Wallet wallet) {
-        return EventMessage.builder()
-                .activityName(UseCase.RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA)
-                .eventCode(
-                        EventCode.RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA + EventCode.SEQUENCE_REQUEST)
-                .eventTitle("Receiving wallet-data-changed request from Kafka")
-                .businessData(wallet)
-                .eventSource(applicationName)
-                .eventTraceId(ThreadContextUtils.getCustomRequest().getRequestId())
-                .eventType(EventType.UPDATE)  
-                .build();
     }
 
 }

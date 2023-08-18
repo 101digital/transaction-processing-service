@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ConfigurationService {
@@ -86,6 +87,7 @@ public class ConfigurationService {
         }
     }
     
+    @Transactional
     public void deleteConfigurationById(String configurationId) {
     	
     	String businessId = String.format("Configuration Id: %s", configurationId);
