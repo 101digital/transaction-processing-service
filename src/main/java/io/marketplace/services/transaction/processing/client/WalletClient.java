@@ -9,12 +9,18 @@ import io.marketplace.commons.logging.Error;
 import io.marketplace.commons.logging.Logger;
 import io.marketplace.commons.logging.LoggerFactory;
 import io.marketplace.commons.model.dto.ObjectResponseDto;
+import io.marketplace.commons.utils.MembershipUtils;
 import io.marketplace.services.transaction.processing.common.ErrorCodes;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferResponse;
+import io.marketplace.services.transaction.processing.dto.WalletListResponse;
 import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
+import io.marketplace.services.transaction.processing.utils.Constants.EventTitle;
 import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 import io.marketplace.services.transaction.processing.utils.EventTrackingService;
+
+import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,6 +55,7 @@ public class WalletClient {
     @Autowired private JWTFactory jwtFactory;
 
     private final String PATH_FUND_TRANSFERS = "/transfers";
+    public static final String WALLETS = "/wallets";
 
     public WalletFundTransferResponse walletFundTransfer(
             WalletFundTransferRequest walletFundTransferRequest, String userId) {
@@ -131,6 +138,49 @@ public class WalletClient {
             LOGGER.error(exceptionMsg + "{}", exception);
             throw exception;
         }
+    }
+    
+    public WalletListResponse getWalletInformationByAccountNumber(
+            String accountNumber) {
+    	String businessId = String.format("AccountNumber: %s", accountNumber);
+
+        LOGGER.info("Configuration Id: {}", accountNumber);
+
+        eventTracker.traceEvent(
+        		UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+                EventCode.EVENT_RECEIVE_TRANSACTION_DATA
+                        + EventCode.SEQUENCE_INVOKE,
+                        EventTitle.INVOKE_WALLET_BY_ACCOUNT_NUMBER,
+                businessId,
+                accountNumber);
+        try {
+
+            URI uri = URI.create(walletServiceBaseUrl + WALLETS);
+            
+            final String url =
+                    UriComponentsBuilder.fromUriString(walletServiceBaseUrl)
+                            .path(WALLETS)
+                            .queryParam("accountNumber", accountNumber)
+                            .toUriString();
+
+            LOGGER.info("Start to call wallet URL: {}", uri);
+            HttpEntity<?> rqEntity = new HttpEntity<>(getHttpHeadersForInternalCall(MembershipUtils.getUserId()));
+            ResponseEntity<WalletListResponse> response =
+                    restInternal.exchange(url, HttpMethod.GET, rqEntity, WalletListResponse.class);
+
+            LOGGER.info(
+                    "Wallet information by account GET response {}", gson.toJson(response));
+            
+            if (response.getBody() != null) {
+                return response.getBody();
+            }
+        } catch (Exception ex) {
+        	 throw new InternalServerErrorException(
+                     ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getCode(),
+                     ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(),
+                     accountNumber);
+        }
+        return null;
     }
 
     private HttpHeaders getHttpHeadersForInternalCall(String userId) {
