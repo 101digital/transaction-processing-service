@@ -47,6 +47,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+    get:
+      operationId: getConfigurations
+      summary: Get configurations
+      tags:
+        - Configurations
+      parameters:
+        - name: type
+          required: false
+          in: query
+          schema:
+            type: string
+          example: ROUNDUP_CONTRIBUTION
+        - name: walletId
+          required: true
+          in: query
+          schema:
+            type: string
+          example: 18957-94517-15684-46645
+        - name: pageNumber
+          required: false
+          in: query
+          schema:
+            type: int
+          example: 1
+        - name: pageSize
+          required: false
+          in: query
+          schema:
+            type: int
+          example: 10
+        - name: listOrders
+          in: query
+          description: Results will be sorted and ordered based on the given criteria
+          required: false
+          schema:
+            type: string
+          example: createdAt-DESC,updatedAt-ASC
+      responses:
+        '200':
+          description: Confirm success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationsListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error while performing file operations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
       security:
         - bearer: [ ]
 
@@ -185,6 +247,15 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/Configurations'
+    ConfigurationsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Configurations'
+        paging:
+          $ref: '#/components/schemas/PagingInformation'
   securitySchemes:
     Bearer:
       type: http

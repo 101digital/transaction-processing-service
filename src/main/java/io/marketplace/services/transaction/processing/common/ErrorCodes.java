@@ -21,6 +21,7 @@ public enum ErrorCodes {
     INVALID_TRANSACTION_CARD_SCHEME_NAME("161.01.400.11", "Invalid card scheme name for transaction"),
     INVALID_TRANSACTION_AUTHORIZATION_TYPE("161.01.400.12", "Invalid authorization type for transaction"),
     INVALID_TRANSACTION_MUTABILITY_CODE("161.01.400.13", "Invalid mutability code for transaction"),
+    MISSING_WALLET_ID("161.01.400.06", "Missing WalletId"),
 
     // 403
 
@@ -30,7 +31,10 @@ public enum ErrorCodes {
 
     // 500
     ERROR_WHILE_ADD_CONFIGURATIONS("161.01.500.01", "Error While Adding Configuration."),
-    ERR_DELETE_DB_ERROR("161.01.500.02", "Error occurred when deleting Configuration record.");
+    ERR_DELETE_DB_ERROR("161.01.500.02", "Error occurred when deleting Configuration record."),
+    ERROR_WHILE_GET_CONFIGURATIONS("161.01.500.03", "Error while getting configurations"),
+    ERROR_GETTING_RESPONSE("161.01.500.04", "Error while getting response"),
+    ERROR_CALL_WALLET_SERVICE("161.01.500.05","Error While Calling Wallet Service");
 
     private final String code;
     private final String message;
