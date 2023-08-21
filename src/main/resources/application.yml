@@ -94,3 +94,7 @@ membership.server.base-url: http://membership-service:8080
 configuration:
   types: ROUNDUP_CONTRIBUTION
   logic-codes: TBD
+  
+roundUpConfig:
+  eligibleBankTransactionCodes: DuiNowQR,Visa Purchase,MyDebit Purchase
+  type: ROUNDUP_CONTRIBUTION

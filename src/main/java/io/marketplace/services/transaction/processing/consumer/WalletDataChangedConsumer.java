@@ -12,7 +12,10 @@ import io.marketplace.services.transaction.processing.dto.Wallet;
 import io.marketplace.services.transaction.processing.entity.ConfigurationParamEntity;
 import io.marketplace.services.transaction.processing.repository.ConfigurationParamRepository;
 import io.marketplace.services.transaction.processing.service.ConfigurationService;
+import io.marketplace.services.transaction.processing.utils.EventTrackingService;
 import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
+import io.marketplace.services.transaction.processing.utils.Constants.EventTitle;
+import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -49,6 +53,8 @@ public class WalletDataChangedConsumer {
     
     @Autowired private ConfigurationParamRepository configurationParamRepository;
     
+    @Autowired private EventTrackingService eventTrackingService;
+    
     @KafkaListener(
             topics = "${kafka.topics.wallet-data-changed:wallet-data-changed}",
             groupId = "${kafka.group-id:transaction-processing-service}",
@@ -62,6 +68,17 @@ public class WalletDataChangedConsumer {
             EventMessage<Wallet> eventMessage =
                     eventMessageUtil.fromQueueMessage(message, Wallet.class);
             setupRequestContext();
+            String businessId = String.format("walletId: %s", Optional.of(eventMessage)
+            		.map(EventMessage::getBusinessData)
+            		.map(Wallet::getWalletId)
+            		.orElse(""));
+            
+            eventTrackingService.traceEvent(
+                    UseCase.RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA,
+                    EventCode.RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA + EventCode.SEQUENCE_REQUEST,
+                    EventTitle.WALLET_DATA_RECV_REQUEST,
+                    businessId,
+                    eventMessage.getBusinessData());
             
             if (!validateEvent(eventMessage)) {
                 return;
@@ -73,6 +90,13 @@ public class WalletDataChangedConsumer {
             }
             
             processTransactionProcessing(wallet);
+            
+            eventTrackingService.traceEvent(
+                    UseCase.RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA,
+                    EventCode.RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA + EventCode.SEQUENCE_RESPONSE,
+                    EventTitle.WALLET_DATA_RECV_RESPONSE,
+                    businessId,
+                    eventMessage.getBusinessData());
     		
     	} finally {
             RequestContextHolder.resetRequestAttributes();
