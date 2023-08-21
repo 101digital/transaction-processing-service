@@ -72,13 +72,14 @@ public class ConfigurationService {
             ConfigurationEntity configurationEntity =
                     configurationUtils.toConfigurationEntity(configurations);
 
-            configurationEntity = configurationRepository.save(configurationEntity);
 
             List<ConfigurationParamEntity> list =
                     configurationUtils.toConfigurationParamEntity(
                             configurations.getSupplementaryData(), configurationEntity.getId());
 
-            configurationParamRepository.saveAll(list);
+            configurationEntity.setConfigurationParamList(list);
+
+            configurationEntity = configurationRepository.save(configurationEntity);
 
             eventTrackingService.traceEvent(
                     UseCase.ADD_CONFIGURATION,
