@@ -111,8 +111,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - bearer: [ ]
-
-
   /configurations/{configurationId}:
     delete:
       tags:
@@ -140,6 +138,64 @@ paths:
             application/json:
               schema:
                 $ref: string
+        404:
+          description: Data Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Input data is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        409:
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - Bearer: [ ]
+    put:
+      tags:
+        - Configurations
+      summary: Update the configuration using configuration ID.
+      operationId: updateConfigurationById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Configurations'
+      parameters:
+        - name: configurationId
+          in: path
+          description: configuration id
+          required: true
+          schema:
+            type: string
+          example: 123
+      responses:
+        503:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        200:
+          description: Confirm success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationsResponse'
         404:
           description: Data Not Found
           content:

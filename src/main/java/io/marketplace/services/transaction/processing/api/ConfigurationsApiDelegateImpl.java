@@ -35,4 +35,12 @@ public class ConfigurationsApiDelegateImpl implements ConfigurationsApiDelegate 
                         configurationService.getConfigurations(
                                 walletId, type, pageNumber, pageSize, listOrders));
     }
+
+    @Override
+    public ResponseEntity<ConfigurationsResponse> updateConfigurationById(String configurationId,
+        Configurations configurations) {
+
+        return ResponseEntity.ok().body(configurationService.updateConfigurationById(configurationId,configurations));
+
+    }
 }

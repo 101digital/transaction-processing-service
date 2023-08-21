@@ -1,5 +1,6 @@
 package io.marketplace.services.transaction.processing.service;
 
+import com.google.gson.Gson;
 import io.marketplace.commons.exception.BadRequestException;
 import io.marketplace.commons.exception.InternalServerErrorException;
 import io.marketplace.commons.exception.NotFoundException;
@@ -21,12 +22,17 @@ import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
 import io.marketplace.services.transaction.processing.utils.Constants.EventTitle;
 import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 import io.marketplace.services.transaction.processing.utils.EventTrackingService;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +51,11 @@ public class ConfigurationService {
 
     @Autowired private EventTrackingService eventTrackingService;
 
+    @Value("#{'${configuration.logic-codes}'.split(',')}")
+    private List<String> configurationLogicCodes;
+
+    @Autowired private Gson gson;
+
     public ConfigurationsResponse addConfigurations(Configurations configurations) {
 
         String businessId = String.format("Configuration: %s", configurations);
@@ -62,13 +73,14 @@ public class ConfigurationService {
             ConfigurationEntity configurationEntity =
                     configurationUtils.toConfigurationEntity(configurations);
 
-            configurationEntity = configurationRepository.save(configurationEntity);
 
             List<ConfigurationParamEntity> list =
                     configurationUtils.toConfigurationParamEntity(
                             configurations.getSupplementaryData(), configurationEntity.getId());
 
-            configurationParamRepository.saveAll(list);
+            configurationEntity.setConfigurationParamList(list);
+
+            configurationEntity = configurationRepository.save(configurationEntity);
 
             eventTrackingService.traceEvent(
                     UseCase.ADD_CONFIGURATION,
@@ -239,6 +251,138 @@ public class ConfigurationService {
                     ErrorCodes.ERROR_WHILE_GET_CONFIGURATIONS.getCode(),
                     ErrorCodes.ERROR_WHILE_GET_CONFIGURATIONS.getMessage(),
                     businessId);
+        }
+    }
+
+    public ConfigurationsResponse updateConfigurationById(
+            String configurationId, Configurations configurations) {
+
+        String businessId =
+                String.format(
+                        "Update ConfigurationId: %s , Configuration: %s",
+                        configurationId, configurations);
+
+        log.info(
+                "Update Configuration Request , ConfigurationId: {} , Configuration: {}",
+                configurationId,
+                configurations);
+
+        eventTrackingService.traceEvent(
+                UseCase.UPDATE_CONFIGURATIONS,
+                EventCode.PUT_CONFIGURATIONS + EventCode.SEQUENCE_REQUEST,
+                UseCase.UPDATE_CONFIGURATIONS,
+                businessId,
+                configurationId);
+
+        Optional<ConfigurationEntity> optionalConfigurationEntity =
+                configurationRepository.findById(UUID.fromString(configurationId));
+
+        if (!optionalConfigurationEntity.isPresent()) {
+            throw new BadRequestException(
+                    ErrorCodes.INVALID_CONFIGURATION_ID.getCode(),
+                    ErrorCodes.INVALID_CONFIGURATION_ID.getMessage(),
+                    businessId);
+        } else {
+
+            try {
+
+                ConfigurationEntity configurationEntity = optionalConfigurationEntity.get();
+
+                if (!configurationEntity
+                        .getType()
+                        .equalsIgnoreCase(
+                                Optional.ofNullable(configurations)
+                                        .map(Configurations::getType)
+                                        .orElse(""))) {
+                    throw new BadRequestException(
+                            ErrorCodes.INVALID_CONFIGURATION_TYPE.getCode(),
+                            ErrorCodes.INVALID_CONFIGURATION_TYPE.getMessage(),
+                            businessId);
+                }
+
+                if (!configurationEntity
+                        .getWallet()
+                        .equalsIgnoreCase(
+                                Optional.ofNullable(configurations)
+                                        .map(Configurations::getWalletId)
+                                        .orElse(""))) {
+                    throw new BadRequestException(
+                            ErrorCodes.INVALID_WALLET_ID.getCode(),
+                            ErrorCodes.INVALID_WALLET_ID.getMessage(),
+                            businessId);
+                }
+
+                if (!StringUtils.isEmpty(configurations.getLogicCode())) {
+                    if (configurationLogicCodes.contains(configurations.getLogicCode())) {
+                        configurationEntity.setLogicCode(configurations.getLogicCode());
+                    } else {
+                        throw new BadRequestException(
+                                ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getCode(),
+                                ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getMessage(),
+                                businessId);
+                    }
+                }
+
+                Map<String, String> supplementaryData =
+                        gson.fromJson(
+                                gson.toJson(configurations.getSupplementaryData()), Map.class);
+
+                List<ConfigurationParamEntity> configurationParamEntityList =
+                        configurationEntity.getConfigurationParamList();
+
+                List<ConfigurationParamEntity> temp = new ArrayList<>();
+
+                supplementaryData.entrySet().stream()
+                        .forEach(
+                                entry -> {
+                                    configurationParamEntityList.stream()
+                                            .forEach(
+                                                    param -> {
+                                                        if (param.getParamName()
+                                                                .equalsIgnoreCase(entry.getKey())) {
+                                                            param.setValue(entry.getValue());
+                                                        } else {
+                                                            temp.add(
+                                                                    ConfigurationParamEntity
+                                                                            .builder()
+                                                                            .id(UUID.randomUUID())
+                                                                            .configurationId(
+                                                                                    UUID.fromString(
+                                                                                            configurationId))
+                                                                            .paramName(
+                                                                                    entry.getKey())
+                                                                            .value(entry.getValue())
+                                                                            .build());
+                                                        }
+                                                    });
+                                });
+
+                configurationParamEntityList.addAll(temp);
+
+                configurationEntity.setConfigurationParamList(configurationParamEntityList);
+
+                configurationEntity.setUpdatedAt(LocalDateTime.now());
+
+                configurationEntity = configurationRepository.save(configurationEntity);
+
+                eventTrackingService.traceEvent(
+                        UseCase.UPDATE_CONFIGURATIONS,
+                        EventCode.PUT_CONFIGURATIONS + EventCode.SEQUENCE_RESPONSE,
+                        UseCase.UPDATE_CONFIGURATIONS,
+                        businessId,
+                        configurationId);
+
+                return configurationUtils.toConfigurationResponse(configurationEntity);
+
+            } catch (Exception exception) {
+
+                log.error("Error While Updating Configurations: {}", exception);
+
+                throw new InternalServerErrorException(
+                        ErrorCodes.ERROR_UPDATE_CONFIGURATIONS.getCode(),
+                        ErrorCodes.ERROR_UPDATE_CONFIGURATIONS.getMessage(),
+                        businessId);
+            }
         }
     }
 }
