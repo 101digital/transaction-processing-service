@@ -29,36 +29,21 @@ jwt:
   ignore-check: true
   header-name: X-JWT-Assertion
   providers:
-    - issuer: wso2.org/products/am
-      secret: lSGznpPgmBOY4rzD4dKV6yVt1zVdYkDNqciolbi4fRI=
-      jwtUserType: APPLICATION_USER
-      jwtAppType: APPLICATION
-      expiry: 60
-      verifySecret: false
-      issuerClaim: iss
-      userTypeClaim: http://wso2.org/claims/usertype
-      userIdClaim: http://wso2.org/claims/userid
-      orgIdClaim: http://wso2.org/claims/identity/organisationId
-      entityIdClaim: http://wso2.org/claims/entityId
-      appIdClaim: http://wso2.org/claims/applicationname
-      roleClaim: http://wso2.org/claims/role
-      permissionClaim: http://wso2.org/claims/permissions
-      subscriberClaim: http://wso2.org/claims/subscriber
-    - issuer: 101D
+    - issuer: internal
       secret: 2N+Pd5jwo/UXksl/EsDncl3Y7H0M7OQ/FzkvZ5o0MuM=
       jwtUserType: APPLICATION_USER
       jwtAppType: APPLICATION
       expiry: 60
       verifySecret: true
       issuerClaim: iss
-      userTypeClaim: http://wso2.org/claims/usertype
-      userIdClaim: http://wso2.org/claims/enduser
-      orgIdClaim: http://wso2.org/claims/identity/organisationId
-      entityIdClaim: http://wso2.org/claims/entityId
-      appIdClaim: http://wso2.org/claims/applicationname
-      roleClaim: http://wso2.org/claims/role
-      permissionClaim: http://wso2.org/claims/permission
-      subscriberClaim: http://wso2.org/claims/subscriber
+      userTypeClaim: http://internal/claims/usertype
+      userIdClaim: http://internal/claims/enduser
+      orgIdClaim: http://internal/claims/identity/organisationId
+      entityIdClaim: http://internal/claims/entityId
+      appIdClaim: http://internal/claims/applicationname
+      roleClaim: http://internal/claims/role
+      permissionClaim: http://internal/claims/permission
+      subscriberClaim: http://internal/claims/subscriber
 
 logging.level.org.apache.http.wire: DEBUG
 http.log.enabled: false
