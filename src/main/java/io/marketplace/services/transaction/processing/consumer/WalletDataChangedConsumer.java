@@ -8,15 +8,11 @@ import io.marketplace.commons.model.event.EventMessage;
 import io.marketplace.commons.model.event.EventType;
 import io.marketplace.commons.utils.EventMessageUtils;
 import io.marketplace.commons.utils.ThreadContextUtils;
-import io.marketplace.services.pxchange.client.service.PXChangeServiceClient;
 import io.marketplace.services.transaction.processing.dto.Wallet;
-import io.marketplace.services.transaction.processing.entity.ConfigurationEntity;
 import io.marketplace.services.transaction.processing.entity.ConfigurationParamEntity;
 import io.marketplace.services.transaction.processing.repository.ConfigurationParamRepository;
-import io.marketplace.services.transaction.processing.repository.ConfigurationRepository;
 import io.marketplace.services.transaction.processing.service.ConfigurationService;
 import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
-import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,8 +42,6 @@ public class WalletDataChangedConsumer {
     
     @Value("${transaction-processing-config.contribution-param-name:contributionWalletId}")
     private String contributionWalletId;
-    
-    @Autowired private PXChangeServiceClient pxClient;
 
     @Autowired private EventMessageUtils eventMessageUtil;
     

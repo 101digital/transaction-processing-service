@@ -12,6 +12,10 @@ public class Constants {
         public static final String ADD_CONFIGURATION_RESPONSE = "Add Configuration Respone";
         public static final String DELETE_CONFIGURATION_REQUEST = "Delete Configuration Request";
         public static final String DELETE_CONFIGURATION_RESPONSE = "Delete Configuration Respone";
+        
+        public static final String TRANSACTION_DATA_RECV_REQUEST = "Received the kafka message for the transaction.";
+        public static final String TRANSACTION_DATA_RECV_RESPONSE = "Successfully processed the kafka message for the transaction";
+        
 
     }
 
@@ -21,7 +25,7 @@ public class Constants {
 
         public static final String ADD_CONFIGURATION = "Add Configuration";
         public static final String DELETE_CONFIGURATION = "Delete Configuration";
-        public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "Receive Wallet data changed from Kafka";
+        public static final String ACTIVITY_RECEIVE_TRANSACTION_DATA = "Transaction data received for round up configuration";
 
     }
 
@@ -37,7 +41,7 @@ public class Constants {
         public static final String DELETE_CONFIGURATION_EVENT_CODE = "DELETE.CONFIGURATION";
         
         public static final String WALLET_CLOSED = "WALLET.CLOSED";
-        public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "RECEIVE.WALLET.DATA.CHANGED.FROM.KAFKA";
+        public static final String EVENT_RECEIVE_TRANSACTION_DATA = "RECV.TRANSACTION.DATA";
 
 
     }
