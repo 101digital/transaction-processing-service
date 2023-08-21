@@ -22,6 +22,7 @@ import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
 import io.marketplace.services.transaction.processing.utils.Constants.EventTitle;
 import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 import io.marketplace.services.transaction.processing.utils.EventTrackingService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -360,6 +361,8 @@ public class ConfigurationService {
 
                 configurationEntity.setConfigurationParamList(configurationParamEntityList);
 
+                configurationEntity.setUpdatedAt(LocalDateTime.now());
+
                 configurationEntity = configurationRepository.save(configurationEntity);
 
                 eventTrackingService.traceEvent(
@@ -376,8 +379,8 @@ public class ConfigurationService {
                 log.error("Error While Updating Configurations: {}", exception);
 
                 throw new InternalServerErrorException(
-                        ErrorCodes.ERROR_WHILE_GET_CONFIGURATIONS.getCode(),
-                        ErrorCodes.ERROR_WHILE_GET_CONFIGURATIONS.getMessage(),
+                        ErrorCodes.ERROR_UPDATE_CONFIGURATIONS.getCode(),
+                        ErrorCodes.ERROR_UPDATE_CONFIGURATIONS.getMessage(),
                         businessId);
             }
         }
