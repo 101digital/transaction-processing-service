@@ -22,6 +22,8 @@ public class Constants {
         public static final String ADD_CONFIGURATION = "Add Configuration";
         public static final String DELETE_CONFIGURATION = "Delete Configuration";
         public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "Receive Wallet data changed from Kafka";
+        public static final String GET_CONFIGURATIONS = "Get Configurations";
+        public static final String WALLET_FUND_TRANSFER = "Wallet Fund Transfer";
 
     }
 
@@ -38,6 +40,8 @@ public class Constants {
         
         public static final String WALLET_CLOSED = "WALLET.CLOSED";
         public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "RECEIVE.WALLET.DATA.CHANGED.FROM.KAFKA";
+        public static final String GET_CONFIGURATIONS = "GET.CONFIGURATIONS";
+        public static final String WALLET_FUND_TRANSFER = "POST.WALLET.FUND.TRANSFER";
 
 
     }
