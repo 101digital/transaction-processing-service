@@ -1,5 +1,6 @@
 package io.marketplace.services.transaction.processing.entity;
 
+import io.marketplace.services.transaction.processing.producer.RoundUpConfigurationDataChanged;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -7,6 +8,7 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -25,6 +27,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "configuration")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EntityListeners({RoundUpConfigurationDataChanged.class})
 public class ConfigurationEntity {
 
     @Id
@@ -55,4 +58,6 @@ public class ConfigurationEntity {
     @Column(name = "send_notification", nullable = false)
     private boolean sendNotification;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "configurationId", fetch = FetchType.LAZY)
+    private List<ConfigurationParamEntity> configurationParamList;
 }

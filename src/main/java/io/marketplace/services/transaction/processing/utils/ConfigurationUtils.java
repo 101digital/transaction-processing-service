@@ -43,8 +43,7 @@ public class ConfigurationUtils {
 
         String businessId = String.format("Configuration: %s", configurations);
 
-        String type =
-                Optional.ofNullable(configurations).map(Configurations::getType).orElse("");
+        String type = Optional.ofNullable(configurations).map(Configurations::getType).orElse("");
 
         if (StringUtils.isEmpty(type)) {
 
@@ -63,9 +62,7 @@ public class ConfigurationUtils {
         }
 
         String logicCode =
-                Optional.ofNullable(configurations)
-                        .map(Configurations::getLogicCode)
-                        .orElse("");
+                Optional.ofNullable(configurations).map(Configurations::getLogicCode).orElse("");
 
         if (StringUtils.isEmpty(logicCode)) {
 
@@ -103,6 +100,7 @@ public class ConfigurationUtils {
 
         return ConfigurationEntity.builder()
                 .id(UUID.randomUUID())
+                .logicCode(configurations.getLogicCode())
                 .type(configurations.getType())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -159,6 +157,33 @@ public class ConfigurationUtils {
                                 .updatedby(configurationEntity.getUpdatedBy())
                                 .supplementaryData(supplementaryData)
                                 .build())
+                .build();
+    }
+
+    public Configurations toConfiguration(ConfigurationEntity configurationEntity) {
+
+        List<ConfigurationParamEntity> configurationParamEntities =
+                configurationEntity.getConfigurationParamList();
+
+        Map<String, String> supplementaryData = new HashMap<>();
+
+        configurationParamEntities.stream()
+                .forEach(
+                        configurationParamEntity ->
+                                supplementaryData.put(
+                                        configurationParamEntity.getParamName(),
+                                        configurationParamEntity.getValue()));
+
+        return Configurations.builder()
+                .id(configurationEntity.getId())
+                .logicCode(configurationEntity.getLogicCode())
+                .walletId(configurationEntity.getWallet())
+                .type(configurationEntity.getType())
+                .createdAt(configurationEntity.getCreatedAt())
+                .updatedAt(configurationEntity.getUpdatedAt())
+                .createdBy(configurationEntity.getCreatedBy())
+                .updatedby(configurationEntity.getUpdatedBy())
+                .supplementaryData(supplementaryData)
                 .build();
     }
 }
