@@ -37,11 +37,11 @@ public class ConfigurationsSpecification implements Specification<ConfigurationE
             Root<ConfigurationEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
 
-        if (!StringUtils.isEmpty(requestSearchConfiguration.getType())) {
+        if (StringUtils.isNotEmpty(requestSearchConfiguration.getType())) {
             predicates.add(cb.equal(root.get(TYPE), requestSearchConfiguration.getType()));
         }
 
-        if (StringUtils.isEmpty(requestSearchConfiguration.getWalletId())) {
+        if (StringUtils.isNotEmpty(requestSearchConfiguration.getWalletId())) {
             predicates.add(cb.equal(root.get(WALLET_ID), requestSearchConfiguration.getWalletId()));
         }
 
