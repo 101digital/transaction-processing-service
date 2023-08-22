@@ -96,5 +96,5 @@ configuration:
   logic-codes: DEFAULT
   
 roundUpConfig:
-  eligibleBankTransactionCodes: DuiNowQR,Visa Purchase,MyDebit Purchase
+  eligibleBankTransactionCodes: DuitNowQR,Visa Purchase,MyDebit Purchase
   type: ROUNDUP_CONTRIBUTION
