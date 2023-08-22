@@ -31,6 +31,7 @@ public class Constants {
         public static final String ACTIVITY_RECEIVE_TRANSACTION_DATA = "Transaction data received for round up configuration";
         public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "Receive Wallet data changed from Kafka";
         public static final String GET_CONFIGURATIONS = "Get Configurations";
+        public static final String UPDATE_CONFIGURATIONS = "Update Configurations";
         public static final String WALLET_FUND_TRANSFER = "Wallet Fund Transfer";
 
     }
@@ -50,6 +51,7 @@ public class Constants {
         public static final String EVENT_RECEIVE_TRANSACTION_DATA = "RECV.TRANSACTION.DATA";
         public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "RECV.WALLET.DATA";
         public static final String GET_CONFIGURATIONS = "GET.CONFIGURATIONS";
+        public static final String PUT_CONFIGURATIONS = "PUT.CONFIGURATIONS";
         public static final String WALLET_FUND_TRANSFER = "POST.WALLET.FUND.TRANSFER";
 
 

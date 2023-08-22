@@ -100,6 +100,7 @@ public class ConfigurationUtils {
 
         return ConfigurationEntity.builder()
                 .id(UUID.randomUUID())
+                .logicCode(configurations.getLogicCode())
                 .type(configurations.getType())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
