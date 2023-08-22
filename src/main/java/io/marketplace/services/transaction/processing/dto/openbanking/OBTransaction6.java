@@ -26,6 +26,12 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OBTransaction6 {
+	
+	@JsonProperty("UserId")
+    @SerializedName("UserId")
+	private String userId;
+	
+	
     @JsonProperty("AccountId")
     @SerializedName("AccountId")
     private String accountId;
