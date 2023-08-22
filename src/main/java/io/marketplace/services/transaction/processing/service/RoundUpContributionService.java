@@ -66,7 +66,7 @@ public class RoundUpContributionService {
 	public void processTransaction(OBTransaction6 transaction) {
 		Optional<ConfigurationEntity> optConfig = isTransactionEligible(transaction);
 		if (!optConfig.isPresent()) {
-			log.info("Transaction not supported to round up configuration {}", gson.toJson(transaction));
+			log.info("Transaction not eligible to round up contribution {}", gson.toJson(transaction));
 			return;
 		}
 
@@ -107,6 +107,7 @@ public class RoundUpContributionService {
 
 	private Optional<ConfigurationEntity> isTransactionEligible(OBTransaction6 transaction) {
 		Optional<ConfigurationEntity> optConfig = Optional.empty();
+		log.info("Round up process eligibility check started {}", gson.toJson(transaction));
 		if (OBEntryStatus1Code.COMPLETED != transaction.getStatus()
 				|| OBCreditDebitCode1.DEBIT != transaction.getCreditDebitIndicator()) {
 			log.info("Not Eligible for round up due to Status: {} and CreditDebitIndicator: {} ",
@@ -118,6 +119,7 @@ public class RoundUpContributionService {
 				.map(OBBankTransactionCodeStructure1::getCode).orElse(EMPTY_VALUE);
 
 		if (!eligibleBankTransactionCodes.contains(bankTransactionCode) || !validateMerchantCategoryCode(transaction)) {
+			log.info("Not Eligible for round up due to not supported bank transaction code or mcc ");
 			return optConfig;
 		}
 
@@ -141,7 +143,7 @@ public class RoundUpContributionService {
 								.map(OBMerchantDetails1::getMerchantCategoryCode).orElse(EMPTY_VALUE))
 				.filter(str -> !str.isEmpty()).findFirst().orElse(EMPTY_VALUE);
 		if (StringUtils.isEmpty(mcc) || "0000".equals(mcc)) {
-			log.info("Merchant Category Code validation failed{}", mcc);
+			log.info("Merchant category Code not supported {}", mcc);
 			return false;
 		}
 		return true;
