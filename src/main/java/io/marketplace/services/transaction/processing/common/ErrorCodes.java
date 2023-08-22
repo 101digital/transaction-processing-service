@@ -22,6 +22,7 @@ public enum ErrorCodes {
     INVALID_TRANSACTION_AUTHORIZATION_TYPE("161.01.400.12", "Invalid authorization type for transaction"),
     INVALID_TRANSACTION_MUTABILITY_CODE("161.01.400.13", "Invalid mutability code for transaction"),
     MISSING_WALLET_ID("161.01.400.06", "Missing WalletId"),
+    MISSING_DEBITOR_ACCOUNT("161.01.400.07", "Missing debitor identification in transaction data change event"),
 
     // 403
 

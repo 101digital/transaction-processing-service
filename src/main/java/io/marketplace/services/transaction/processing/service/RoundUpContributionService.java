@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 
+import io.marketplace.commons.exception.BadRequestException;
 import io.marketplace.commons.logging.Logger;
 import io.marketplace.commons.logging.LoggerFactory;
 import io.marketplace.commons.utils.StringUtils;
 import io.marketplace.services.transaction.processing.client.WalletClient;
+import io.marketplace.services.transaction.processing.common.ErrorCodes;
 import io.marketplace.services.transaction.processing.dto.Wallet;
 import io.marketplace.services.transaction.processing.dto.WalletListResponse;
 import io.marketplace.services.transaction.processing.dto.openbanking.OBBankTransactionCodeStructure1;
@@ -29,49 +31,58 @@ import io.marketplace.services.transaction.processing.repository.ConfigurationRe
 @Service
 public class RoundUpContributionService {
 	private static final Logger log = LoggerFactory.getLogger(RoundUpContributionService.class);
-	
+
 	private static final String MERCHANT_CATERGORY_CODE = "merchant_category_code";
 	private static final String EMPTY_VALUE = "";
 
 	@Value("#{'${roundUpConfig.eligibleBankTransactionCodes}'.split(',')}")
 	private List<String> eligibleBankTransactionCodes;
-	
+
 	@Value("${roundUpConfig.type:ROUNDUP_CONTRIBUTION}")
-    private String roundUpConfigType;
+	private String roundUpConfigType;
 
 	@Autowired
 	WalletClient walletClient;
-	
-	@Autowired private Gson gson;
-	
-	@Autowired private ConfigurationRepository configurationRepository;
+
+	@Autowired
+	private Gson gson;
+
+	@Autowired
+	private ConfigurationRepository configurationRepository;
 
 	public void processTransaction(OBTransaction6 transaction) {
-		if(!isTransactionEligible(transaction)) {
+		Optional<ConfigurationEntity> optConfig = isTransactionEligible(transaction);
+		if (!optConfig.isPresent()) {
 			log.info("Transaction not supported to round up configuration {}", gson.toJson(transaction));
 			return;
 		}
 		log.info("Transaction supported to round up configuration {}", gson.toJson(transaction));
 	}
-	
-	private boolean isTransactionEligible(OBTransaction6 transaction) {
-	    if (OBEntryStatus1Code.COMPLETED != transaction.getStatus() ||
-	        OBCreditDebitCode1.DEBIT != transaction.getCreditDebitIndicator()) {
-	        return false;
-	    }
 
-	    String bankTransactionCode = Optional.ofNullable(transaction)
-	            .map(OBTransaction6::getBankTransactionCode)
-	            .map(OBBankTransactionCodeStructure1::getCode)
-	            .orElse(EMPTY_VALUE);
+	private Optional<ConfigurationEntity> isTransactionEligible(OBTransaction6 transaction) {
+		Optional<ConfigurationEntity> optConfig = Optional.empty();
+		if (OBEntryStatus1Code.COMPLETED != transaction.getStatus()
+				|| OBCreditDebitCode1.DEBIT != transaction.getCreditDebitIndicator()) {
+			return optConfig;
+		}
 
-	    if (!eligibleBankTransactionCodes.contains(bankTransactionCode) ||
-	        !validateMerchantCategoryCode(transaction) ||
-	        !validateConfiguration(transaction)) {
-	        return false;
-	    }
+		String bankTransactionCode = Optional.ofNullable(transaction).map(OBTransaction6::getBankTransactionCode)
+				.map(OBBankTransactionCodeStructure1::getCode).orElse(EMPTY_VALUE);
 
-	    return true;
+		if (!eligibleBankTransactionCodes.contains(bankTransactionCode) || !validateMerchantCategoryCode(transaction)) {
+			return optConfig;
+		}
+
+		String debitorAccountNumber = Optional.ofNullable(transaction).map(OBTransaction6::getDebtorAccount)
+				.map(OBCashAccount61::getIdentification)
+				.orElseThrow(() -> new BadRequestException(ErrorCodes.MISSING_DEBITOR_ACCOUNT.getCode(),
+						ErrorCodes.MISSING_DEBITOR_ACCOUNT.getMessage(), gson.toJson(transaction)));
+		String walletId = getWalletIdByAccountNumber(debitorAccountNumber);
+
+		if (walletId != null) {
+			return configurationRepository.findByTypeAndWallet(roundUpConfigType, walletId);
+		}
+		return optConfig;
 	}
 
 	private boolean validateMerchantCategoryCode(OBTransaction6 transaction) {
@@ -86,21 +97,6 @@ public class RoundUpContributionService {
 		return true;
 	}
 
-	private boolean validateConfiguration(OBTransaction6 transaction) {
-		String debitorAccountNumber = Optional.ofNullable(transaction).map(OBTransaction6::getDebtorAccount)
-				.map(OBCashAccount61::getIdentification).orElseThrow();
-
-		String walletId = getWalletIdByAccountNumber(debitorAccountNumber);
-		
-		if(walletId != null) {
-			Optional<ConfigurationEntity> optConfig = configurationRepository.findByTypeAndWallet(roundUpConfigType, walletId);
-			if(optConfig.isPresent()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	private String getWalletIdByAccountNumber(String accountNumber) {
 
 		return Optional.ofNullable(walletClient.getWalletInformationByAccountNumber(accountNumber))
