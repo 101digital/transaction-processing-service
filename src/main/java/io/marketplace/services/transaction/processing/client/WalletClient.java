@@ -144,7 +144,7 @@ public class WalletClient {
             String accountNumber) {
     	String businessId = String.format("AccountNumber: %s", accountNumber);
 
-        LOGGER.info("Configuration Id: {}", accountNumber);
+        LOGGER.info("AccountNumber: {}", accountNumber);
 
         eventTracker.traceEvent(
         		UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
