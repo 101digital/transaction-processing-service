@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-processing-service
+  labels:
+    app.kubernetes.io/instance: transaction-processing-service
+spec:
+  replicas: {{ .Values.kubernetes.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: transaction-processing-service
+      run: transaction-processing-service
+  template:
+    metadata:
+      labels:
+        app: transaction-processing-service
+        run: transaction-processing-service
+    spec:
+      {{- if .Values.affinity }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
+      {{- end }}
+      containers:
+        - image: containers.github.acsdigital.dev/adb/transaction-processing-service:{{ .Values.image.tag }}
+          name: transaction-processing-service
+          imagePullPolicy: {{ .Values.kubernetes.imagePullPolicy }}
+          env:
+            - name: SPRING_APPLICATION_JSON
+              valueFrom:
+                configMapKeyRef:
+                  name: transaction-processing-service-config
+                  key: config.json
+          readinessProbe:
+            failureThreshold: {{ .Values.kubernetes.readinessFailureThreshold | default 2 }}
+            httpGet:
+              path: {{ .Values.kubernetes.httpReadinessPath | default "/actuator/health/readiness" }}
+              port: {{ ((.Values.server).port) | default 8081 }}
+              scheme: {{ .Values.kubernetes.protocol | default "HTTP" }}
+            initialDelaySeconds: {{ .Values.kubernetes.readinessDelaySecs | default 1 }}
+            periodSeconds: {{ .Values.kubernetes.readinessPeriodSecs | default 30 }}
+            successThreshold: {{ .Values.kubernetes.readinessSuccessThreshold | default 1 }}
+            timeoutSeconds: {{ .Values.kubernetes.readinessTimeoutSecs | default 2 }}
+          livenessProbe:
+            failureThreshold: {{ .Values.kubernetes.livenessFailureThreshold | default 2 }}
+            httpGet:
+              path: {{ .Values.kubernetes.httpLivenessPath | default "/actuator/health/liveness" }}
+              port: {{ ((.Values.server).port) | default 8081 }}
+              scheme: {{ .Values.kubernetes.protocol | default "HTTP" }}
+            initialDelaySeconds: {{ .Values.kubernetes.livenessDelaySecs | default 1 }}
+            periodSeconds: {{ .Values.kubernetes.livenessPeriodSecs | default 30 }}
+            successThreshold: {{ .Values.kubernetes.livenessSuccessThreshold | default 1 }}
+            timeoutSeconds: {{ .Values.kubernetes.livenessTimeoutSecs | default 5 }}
+          startupProbe:
+            failureThreshold: {{ .Values.kubernetes.startupFailureThreshold | default 60 }}
+            httpGet:
+              path: {{ .Values.kubernetes.httpStartupPath | default "/actuator/health/liveness" }}
+              port: {{ ((.Values.server).port) | default 8081 }}
+              scheme: {{ .Values.kubernetes.protocol | default "HTTP" }}
+            initialDelaySeconds: {{ .Values.kubernetes.startupDelaySecs | default 30 }}
+            periodSeconds: {{ .Values.kubernetes.startupPeriodSecs | default 5 }}
+            successThreshold: {{ .Values.kubernetes.startupSuccessThreshold | default 1 }}
+            timeoutSeconds: {{ .Values.kubernetes.startupTimeoutSecs | default 1 }}
+          {{ if .Values.server.ssl.enabled }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+            - containerPort: 8081
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /apps/conf/keystore.jks
+              name: tomcat-ssl
+              subPath: keystore.jks
+            - mountPath: /opt/java/openjdk/lib/security/cacerts
+              name: java17-certs
+              subPath: cacerts
+              readOnly: false
+          {{ end }}
+      {{ if .Values.server.ssl.enabled }}
+      volumes:
+        - name: tomcat-ssl
+          secret:
+            defaultMode: 420
+            secretName: tomcat-ssl
+        - name: java17-certs
+          secret:
+            defaultMode: 420
+            secretName: java17-certs
+      {{ end }}
+      {{ if .Values.kubernetes.useSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.kubernetes.imagePullSecrets }}
+      {{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    'prometheus.io/scrape': 'true'
+    'prometheus.io/port': '8081'
+    'prometheus.io/path': '/actuator/prometheus'
+  labels:
+    app.kubernetes.io/instance: transaction-processing-service
+  name: transaction-processing-api-service
+spec:
+  selector:
+    app: transaction-processing-service
+    run: transaction-processing-service
+  ports:
+    {{ if .Values.server.ssl.enabled }}
+    - name: default
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 8443
+    {{ else }}
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: {{ .Values.port | default 8081 }}
+    {{ end }}
+    - name: monitoring
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: transaction-processing-service-config
+  labels:
+    app.kubernetes.io/instance: transaction-processing-service
+data:
+  config.json:
+    '{
+        "spring.profiles.active": "{{.Values.spring.profiles.active}}",
+        "spring.cloud.config.enabled": "{{.Values.spring.cloud.config.enabled}}",
+        "spring.cloud.config.uri": "{{.Values.spring.cloud.config.uri}}",
+        "spring.cloud.config.label": "{{.Values.spring.cloud.config.label}}",
+        "spring.liquibase.enabled" : "{{.Values.spring.liquibase.enabled}}"
+       }'

@@ -1,6 +1,8 @@
 package io.marketplace.services.transaction.processing.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +17,7 @@ public class WalletFundTransferRequest {
     private String transactionType;
     private String consumerCode;
     private Transaction transaction;
+    private List<CustomField> customFields;
 
     @Data
     @Builder
@@ -35,5 +38,13 @@ public class WalletFundTransferRequest {
     @Builder
     public static class Wallet {
         private String walletId;
+    }
+    
+    @Data
+    @Builder
+    public static class CustomField {
+    	private String key;
+        private String value;
+
     }
 }

@@ -30,6 +30,7 @@ public enum ErrorCodes {
 
     // 404
     ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR("161.01.404.01", "Requested Configuration Id not found while deleting RC Configuration."),
+    ERR_SAVINGS_POT_NOT_FOUND_ERROR("161.01.404.02", "Cannot find the contribution wallet id in configuration."),
     // 409
 
     // 500
