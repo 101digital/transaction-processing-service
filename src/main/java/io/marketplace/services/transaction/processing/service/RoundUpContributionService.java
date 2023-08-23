@@ -3,6 +3,7 @@ package io.marketplace.services.transaction.processing.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -24,6 +25,7 @@ import io.marketplace.services.transaction.processing.dto.Wallet;
 import io.marketplace.services.transaction.processing.dto.WalletListResponse;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest.Account;
+import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest.CustomField;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest.Transaction;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferResponse;
 import io.marketplace.services.transaction.processing.dto.openbanking.OBActiveOrHistoricCurrencyAndAmount9;
@@ -45,6 +47,7 @@ public class RoundUpContributionService {
 	private static final String EMPTY_VALUE = "";
 	private final String CONSUMER_CODE = "ADB";
 	private final String TRANSACTION_TYPE = "OWN_ACCOUNTS_TRANSFER";
+	private final String ROUNDUP_CONTRIBUTION_SOURCE_TXN_ID = "RoundUpContributionSourceTxnId";
 
 	@Value("#{'${roundUpConfig.eligibleBankTransactionCodes}'.split(',')}")
 	private List<String> eligibleBankTransactionCodes;
@@ -82,6 +85,11 @@ public class RoundUpContributionService {
 		if (roundUpAmount.compareTo(BigDecimal.ZERO) > 0) {
 			WalletFundTransferRequest walletFundTransferRequest = toWalletFundTransferRequest(configurationEntity,
 					roundUpAmount, amount.getCurrency());
+			CustomField customField = CustomField.builder()
+					.key(ROUNDUP_CONTRIBUTION_SOURCE_TXN_ID)
+					.value(transaction.getTransactionId())
+					.build();
+			walletFundTransferRequest.setCustomFields(Collections.singletonList(customField));
 			log.info("Round up WalletFundTransferRequest: {}", gson.toJson(walletFundTransferRequest));
 
 			WalletFundTransferResponse walletFundTransferResponse = walletClient
@@ -92,10 +100,9 @@ public class RoundUpContributionService {
 
 	private BigDecimal getRoundUpAmount(ConfigurationEntity configurationEntity, String amount) {
 		switch (configurationEntity.getLogicCode()) {
-		case "DEFAULT":
-			return calculateCeilingDifference(amount);
 		case "TODO":
 			return new BigDecimal("0.00"); // implement another round up logic
+		case "DEFAULT":
 		default:
 			return calculateCeilingDifference(amount);
 		}

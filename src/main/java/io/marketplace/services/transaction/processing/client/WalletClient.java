@@ -69,7 +69,7 @@ public class WalletClient {
 
             eventTracker.traceEvent(
                     UseCase.WALLET_FUND_TRANSFER,
-                    EventCode.WALLET_FUND_TRANSFER + EventCode.SEQUENCE_REQUEST,
+                    EventCode.WALLET_FUND_TRANSFER + EventCode.SEQUENCE_INVOKE,
                     "Wallet Fund Transfer",
                     businessId,
                     walletFundTransferRequest);
