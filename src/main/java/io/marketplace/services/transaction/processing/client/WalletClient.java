@@ -163,7 +163,7 @@ public class WalletClient {
                             .queryParam("accountNumber", accountNumber)
                             .toUriString();
 
-            LOGGER.info("Start to call wallet URL: {}", uri);
+            LOGGER.info("Start to call wallet URL: {}", url);
             HttpEntity<?> rqEntity = new HttpEntity<>(getHttpHeadersForInternalCall(MembershipUtils.getUserId()));
             ResponseEntity<WalletListResponse> response =
                     restInternal.exchange(url, HttpMethod.GET, rqEntity, WalletListResponse.class);
@@ -175,6 +175,7 @@ public class WalletClient {
                 return response.getBody();
             }
         } catch (Exception ex) {
+        	LOGGER.error(ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(), ex);
         	 throw new InternalServerErrorException(
                      ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getCode(),
                      ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(),
