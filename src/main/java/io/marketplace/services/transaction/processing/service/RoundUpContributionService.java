@@ -126,7 +126,7 @@ public class RoundUpContributionService {
 
 		String bankTransactionCode = Optional.ofNullable(transaction).map(OBTransaction6::getBankTransactionCode)
 				.map(OBBankTransactionCodeStructure1::getCode).orElse(EMPTY_VALUE);
-
+		
 		if (!eligibleBankTransactionCodes.contains(bankTransactionCode) || !validateMerchantCategoryCode(transaction)) {
 			log.info("Not Eligible for round up due to not supported bank transaction code: {} or mcc ", bankTransactionCode);
 			return optConfig;
