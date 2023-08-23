@@ -1,7 +1,7 @@
 spring:
   application:
     name: transaction-processing-service
-    id: 161
+    id: 160
     entity-id: ADB
   mvc:
     throw-exception-if-no-handler-found: false

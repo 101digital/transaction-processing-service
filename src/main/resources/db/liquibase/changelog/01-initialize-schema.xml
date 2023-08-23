@@ -8,13 +8,12 @@
       <column name="id" type="uuid">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="type" type="varchar(255)">
+      <column name="type" type="uuid">
         <constraints unique="true" nullable="false"/>
       </column>
       <column name="wallet" type="varchar(255)">
         <constraints unique="true" nullable="false"/>
       </column>
-      <column name="logic_code" type="varchar(255)"/>
       <column name="created_by" type="uuid"/>
       <column name="created_at" type="timestamp">
       </column>
