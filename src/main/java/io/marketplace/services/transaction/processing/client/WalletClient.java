@@ -147,15 +147,13 @@ public class WalletClient {
         LOGGER.info("AccountNumber: {}", accountNumber);
 
         eventTracker.traceEvent(
-        		UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
-                EventCode.EVENT_RECEIVE_TRANSACTION_DATA
+        		UseCase.GET_WALLET_ACCOUNT_DETAILS,
+                EventCode.GET_WALLET_ACCOUNT
                         + EventCode.SEQUENCE_INVOKE,
                         EventTitle.INVOKE_WALLET_BY_ACCOUNT_NUMBER,
                 businessId,
                 accountNumber);
         try {
-
-            URI uri = URI.create(walletServiceBaseUrl + WALLETS);
             
             final String url =
                     UriComponentsBuilder.fromUriString(walletServiceBaseUrl)
@@ -164,9 +162,16 @@ public class WalletClient {
                             .toUriString();
 
             LOGGER.info("Start to call wallet URL: {}", url);
-            HttpEntity<?> rqEntity = new HttpEntity<>(getHttpHeadersForInternalCall(MembershipUtils.getUserId()));
-            ResponseEntity<WalletListResponse> response =
-                    restInternal.exchange(url, HttpMethod.GET, rqEntity, WalletListResponse.class);
+            var response =
+                    restInternal.exchange(
+                            url, HttpMethod.GET, new HttpEntity<>(""), WalletListResponse.class);
+            
+            eventTracker.traceEvent(
+                    UseCase.GET_WALLET_ACCOUNT_DETAILS,
+                    EventCode.GET_WALLET_ACCOUNT + EventCode.SEQUENCE_RESPONSE,
+                    EventTitle.RESPONSE_WALLET_BY_ACCOUNT_NUMBER,
+                    businessId,
+                    accountNumber);
 
             LOGGER.info(
                     "Wallet information by account GET response {}", gson.toJson(response));
