@@ -284,6 +284,8 @@ public class ConfigurationService {
                     businessId);
         } else {
 
+            try {
+
                 ConfigurationEntity configurationEntity = optionalConfigurationEntity.get();
 
                 if (!configurationEntity
@@ -320,8 +322,6 @@ public class ConfigurationService {
                                 businessId);
                     }
                 }
-
-            try {
 
                 Map<String, String> supplementaryData =
                         gson.fromJson(

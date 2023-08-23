@@ -17,7 +17,6 @@ public class Constants {
         public static final String TRANSACTION_DATA_RECV_REQUEST = "Received the kafka message for the transaction-data-changed.";
         public static final String TRANSACTION_DATA_RECV_RESPONSE = "Successfully processed the kafka message for the transaction-data-changed";
         public static final String INVOKE_WALLET_BY_ACCOUNT_NUMBER = "Invoke wallet service for retrive wallet id by account number";
-        public static final String RESPONSE_WALLET_BY_ACCOUNT_NUMBER = "Getting wallet info response by account number";
         
 
 
@@ -34,7 +33,6 @@ public class Constants {
         public static final String GET_CONFIGURATIONS = "Get Configurations";
         public static final String UPDATE_CONFIGURATIONS = "Update Configurations";
         public static final String WALLET_FUND_TRANSFER = "Wallet Fund Transfer";
-        public static final String GET_WALLET_ACCOUNT_DETAILS = "Get Wallet Details by Account Number";
 
     }
 
@@ -55,7 +53,6 @@ public class Constants {
         public static final String GET_CONFIGURATIONS = "GET.CONFIGURATIONS";
         public static final String PUT_CONFIGURATIONS = "PUT.CONFIGURATIONS";
         public static final String WALLET_FUND_TRANSFER = "POST.WALLET.FUND.TRANSFER";
-        public static final String GET_WALLET_ACCOUNT = "GET.WALLET.ACCOUNT";
 
 
     }

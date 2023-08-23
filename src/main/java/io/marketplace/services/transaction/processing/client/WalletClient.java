@@ -69,7 +69,7 @@ public class WalletClient {
 
             eventTracker.traceEvent(
                     UseCase.WALLET_FUND_TRANSFER,
-                    EventCode.WALLET_FUND_TRANSFER + EventCode.SEQUENCE_INVOKE,
+                    EventCode.WALLET_FUND_TRANSFER + EventCode.SEQUENCE_REQUEST,
                     "Wallet Fund Transfer",
                     businessId,
                     walletFundTransferRequest);
@@ -144,16 +144,18 @@ public class WalletClient {
             String accountNumber) {
     	String businessId = String.format("AccountNumber: %s", accountNumber);
 
-        LOGGER.info("AccountNumber: {}", accountNumber);
+        LOGGER.info("Configuration Id: {}", accountNumber);
 
         eventTracker.traceEvent(
-        		UseCase.GET_WALLET_ACCOUNT_DETAILS,
-                EventCode.GET_WALLET_ACCOUNT
+        		UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+                EventCode.EVENT_RECEIVE_TRANSACTION_DATA
                         + EventCode.SEQUENCE_INVOKE,
                         EventTitle.INVOKE_WALLET_BY_ACCOUNT_NUMBER,
                 businessId,
                 accountNumber);
         try {
+
+            URI uri = URI.create(walletServiceBaseUrl + WALLETS);
             
             final String url =
                     UriComponentsBuilder.fromUriString(walletServiceBaseUrl)
@@ -161,17 +163,10 @@ public class WalletClient {
                             .queryParam("accountNumber", accountNumber)
                             .toUriString();
 
-            LOGGER.info("Start to call wallet URL: {}", url);
-            var response =
-                    restInternal.exchange(
-                            url, HttpMethod.GET, new HttpEntity<>(""), WalletListResponse.class);
-            
-            eventTracker.traceEvent(
-                    UseCase.GET_WALLET_ACCOUNT_DETAILS,
-                    EventCode.GET_WALLET_ACCOUNT + EventCode.SEQUENCE_RESPONSE,
-                    EventTitle.RESPONSE_WALLET_BY_ACCOUNT_NUMBER,
-                    businessId,
-                    accountNumber);
+            LOGGER.info("Start to call wallet URL: {}", uri);
+            HttpEntity<?> rqEntity = new HttpEntity<>(getHttpHeadersForInternalCall(MembershipUtils.getUserId()));
+            ResponseEntity<WalletListResponse> response =
+                    restInternal.exchange(url, HttpMethod.GET, rqEntity, WalletListResponse.class);
 
             LOGGER.info(
                     "Wallet information by account GET response {}", gson.toJson(response));
@@ -180,7 +175,6 @@ public class WalletClient {
                 return response.getBody();
             }
         } catch (Exception ex) {
-        	LOGGER.error(ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(), ex);
         	 throw new InternalServerErrorException(
                      ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getCode(),
                      ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(),
