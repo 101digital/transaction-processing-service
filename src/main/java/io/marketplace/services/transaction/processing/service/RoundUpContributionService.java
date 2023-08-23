@@ -47,7 +47,7 @@ public class RoundUpContributionService {
 	private static final String EMPTY_VALUE = "";
 	private final String CONSUMER_CODE = "ADB";
 	private final String TRANSACTION_TYPE = "OWN_ACCOUNTS_TRANSFER";
-	private final String ROUNDUP_CONTRIBUTION_SOURCE_TXN_ID = "RoundUpContributionSourceTxnId";
+	private final String ROUNDUP_SOURCE_TXN_ID = "ROUNDUP_SOURCE_TXN_ID";
 
 	@Value("#{'${roundUpConfig.eligibleBankTransactionCodes}'.split(',')}")
 	private List<String> eligibleBankTransactionCodes;
@@ -86,7 +86,7 @@ public class RoundUpContributionService {
 			WalletFundTransferRequest walletFundTransferRequest = toWalletFundTransferRequest(configurationEntity,
 					roundUpAmount, amount.getCurrency());
 			CustomField customField = CustomField.builder()
-					.key(ROUNDUP_CONTRIBUTION_SOURCE_TXN_ID)
+					.key(ROUNDUP_SOURCE_TXN_ID)
 					.value(transaction.getTransactionId())
 					.build();
 			walletFundTransferRequest.setCustomFields(Collections.singletonList(customField));
