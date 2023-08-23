@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 
@@ -62,7 +63,8 @@ public class RoundUpContributionService {
 
 	@Autowired
 	private ConfigurationRepository configurationRepository;
-
+	
+	@Transactional
 	public void processTransaction(OBTransaction6 transaction) {
 		Optional<ConfigurationEntity> optConfig = isTransactionEligible(transaction);
 		if (!optConfig.isPresent()) {
