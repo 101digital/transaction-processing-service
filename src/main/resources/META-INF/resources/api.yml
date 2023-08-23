@@ -1,8 +1,8 @@
 openapi: 3.0.1
 info:
-  title: Schedule Payment Service
+  title: Transaction Processing Service
   version: 1.0.0
-  description: When making Payments, Users are typically presented with options to make those payments at a future date and / or make those payments at regular intervals. The role of the Scheduled Payment Service is to support these capabilities - Future Dated Payments and Recurring Payments. In addition, the Scheduled Payment Service also supports Bulk Payments (or Batch Payments). A typical use case is monthly Payroll Payments that are processed on behalf of Business / Corporate banking Customers.
+  description: Transaction Processing Service
   x-custom-info:
     authors:
       name: Dasun Anushka
@@ -10,26 +10,134 @@ info:
 servers:
   - url: 'http://localhost:8090'
 paths:
-  /test:
-    get:
+  /configurations:
+    post:
+      operationId: addConfigurations
+      summary: Create configurations
       tags:
-        - test endpoint
-      summary: test
-      description: test
-      operationId: testEndpoint
+        - Configurations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Configurations'
       responses:
-        200:
-          description: OK
+        '200':
+          description: Confirm success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TestResponse'
+                $ref: '#/components/schemas/ConfigurationsResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error while performing file operations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      operationId: getConfigurations
+      summary: Get configurations
+      tags:
+        - Configurations
+      parameters:
+        - name: type
+          required: false
+          in: query
+          schema:
+            type: string
+          example: ROUNDUP_CONTRIBUTION
+        - name: walletId
+          required: true
+          in: query
+          schema:
+            type: string
+          example: 18957-94517-15684-46645
+        - name: pageNumber
+          required: false
+          in: query
+          schema:
+            type: int
+          example: 1
+        - name: pageSize
+          required: false
+          in: query
+          schema:
+            type: int
+          example: 10
+        - name: listOrders
+          in: query
+          description: Results will be sorted and ordered based on the given criteria
+          required: false
+          schema:
+            type: string
+          example: createdAt-DESC,updatedAt-ASC
+      responses:
+        '200':
+          description: Confirm success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationsListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error while performing file operations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: [ ]
+  /configurations/{configurationId}:
+    delete:
+      tags:
+        - Configurations
+      summary: Delete the configuration using configuration id
+      operationId: deleteConfigurationById
+      parameters:
+        - name: configurationId
+          in: path
+          description: configuration id
+          required: true
+          schema:
+            type: string
+          example: 123
+      responses:
         503:
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        204:
+          description: Contact deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: string
         404:
           description: Data Not Found
           content:
@@ -48,7 +156,73 @@ paths:
             application/json:
               schema:
                 type: string
-                
+        409:
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - Bearer: [ ]
+    put:
+      tags:
+        - Configurations
+      summary: Update the configuration using configuration ID.
+      operationId: updateConfigurationById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Configurations'
+      parameters:
+        - name: configurationId
+          in: path
+          description: configuration id
+          required: true
+          schema:
+            type: string
+          example: 123
+      responses:
+        503:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        200:
+          description: Confirm success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationsResponse'
+        404:
+          description: Data Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Input data is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        409:
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - Bearer: [ ]
+
 #-----
 components:
   schemas:
@@ -85,20 +259,60 @@ components:
           format: int32
           example: 10
     ErrorResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/Error'
-    Error:
       type: object
-      required:
-        - code
-        - message
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseStatus'
+    ResponseStatus:
+      type: object
       properties:
         code:
           type: string
-          description: Internal error code identification of the platform
-          example: 090.04.500.01
         message:
           type: string
-          description: Internal error message of the platform
-          example: 'Error occurred while processing your request. Please try again later'
+    Configurations:
+      type: object
+      properties:
+        id:
+          type: UUID
+        type:
+          type: string
+        walletId:
+          type: string
+        logicCode:
+          type: string
+        createdBy:
+          type: UUID
+        updatedby:
+          type: UUID
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        supplementaryData:
+          $ref: '#/components/schemas/OBSupplementaryData1'
+    OBSupplementaryData1:
+      type: object
+      description: Additional information that can not be captured in the structured fields and/or any other specific block.
+    ConfigurationsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Configurations'
+    ConfigurationsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Configurations'
+        paging:
+          $ref: '#/components/schemas/PagingInformation'
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer

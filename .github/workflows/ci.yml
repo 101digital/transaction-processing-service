@@ -41,7 +41,7 @@ jobs:
     uses: adb/workflows/.github/workflows/java-backend-pipeline.yml@feature/semver-bump-test
     with:
       java-version: ${{inputs.java-version}}
-      env: ${{ github.event_name != 'workflow_dispatch' && 'stg' || inputs.env }}
+      env: ${{ github.event_name != 'workflow_dispatch' && 'dev' || inputs.env }}
       sonar-required: ${{ github.event_name != 'workflow_dispatch' && 'true' || inputs.sonar-required }}
       bump-level: ${{ inputs.bump-level }}
     secrets: inherit
