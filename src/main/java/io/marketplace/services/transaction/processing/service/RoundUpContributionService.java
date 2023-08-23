@@ -100,10 +100,9 @@ public class RoundUpContributionService {
 
 	private BigDecimal getRoundUpAmount(ConfigurationEntity configurationEntity, String amount) {
 		switch (configurationEntity.getLogicCode()) {
-		case "DEFAULT":
-			return calculateCeilingDifference(amount);
 		case "TODO":
 			return new BigDecimal("0.00"); // implement another round up logic
+		case "DEFAULT":
 		default:
 			return calculateCeilingDifference(amount);
 		}
