@@ -140,12 +140,12 @@ public class RoundUpContributionService {
 				log.info("Round up WalletFundTransferResponse: {}", gson.toJson(walletFundTransferResponse));
 				sendPaymentNotification(roundUpNotificationDetails);
 			}catch (HttpStatusCodeException httpStatusCodeException) {
-				log.error(ErrorCodes.ERROR_WHILE_TRANSFER_PAYMENT.getMessage(), httpStatusCodeException);
+				log.error(ErrorCodes.ERROR_CALL_WALLET_SERVICE.getMessage(), httpStatusCodeException);
 	            eventTrackingService.traceError(
 	                    UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
 	                    EventCode.EVENT_RECEIVE_TRANSACTION_DATA,
-	                    ErrorCodes.ERROR_WHILE_TRANSFER_PAYMENT.getCode(),
-	                    ErrorCodes.ERROR_WHILE_TRANSFER_PAYMENT.getMessage(),
+	                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getCode(),
+	                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getMessage(),
 	                    businessId,
 	                    httpStatusCodeException);
 	            sendFailedPaymentNotification(httpStatusCodeException.getResponseBodyAsString(),roundUpNotificationDetails);
