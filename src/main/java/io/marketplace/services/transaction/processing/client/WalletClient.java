@@ -38,152 +38,89 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class WalletClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WalletClient.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WalletClient.class);
 
-    @Autowired private EventTrackingService eventTracker;
+	@Autowired
+	private EventTrackingService eventTracker;
 
-    @Autowired
-    @Qualifier("internal-rest-template")
-    private RestTemplate restInternal;
+	@Autowired
+	@Qualifier("internal-rest-template")
+	private RestTemplate restInternal;
 
-    @Autowired private Gson gson;
+	@Autowired
+	private Gson gson;
 
-    @Value("${wallet.service.base-url:http://wallet-service:8080}")
-    private String walletServiceBaseUrl;
+	@Value("${wallet.service.base-url:http://wallet-service:8080}")
+	private String walletServiceBaseUrl;
 
-    @Autowired private JWTFactory jwtFactory;
+	@Autowired
+	private JWTFactory jwtFactory;
 
-    private final String PATH_FUND_TRANSFERS = "/transfers";
-    public static final String WALLETS = "/wallets";
+	private final String PATH_FUND_TRANSFERS = "/transfers";
+	public static final String WALLETS = "/wallets";
 
-    public WalletFundTransferResponse walletFundTransfer(
-            WalletFundTransferRequest walletFundTransferRequest, String userId, String useCase, String eventCode) {
+	public WalletFundTransferResponse walletFundTransfer(WalletFundTransferRequest walletFundTransferRequest,
+			String userId, String useCase, String eventCode) {
 
-        String exceptionMsg = "wallet-service connectivity error";
+		String businessId = String.format("WalletTransferRequest %s", walletFundTransferRequest.toString());
 
-        String businessId =
-                String.format("WalletTransferRequest %s", walletFundTransferRequest.toString());
+		eventTracker.traceEvent(useCase, eventCode + EventCode.SEQUENCE_INVOKE,
+				"Received request for invoke Wallet Fund Transfer", businessId, walletFundTransferRequest);
 
-        try {
+		final String url = UriComponentsBuilder.fromUriString(walletServiceBaseUrl).path(PATH_FUND_TRANSFERS)
+				.toUriString();
 
-            eventTracker.traceEvent(
-            		useCase,
-            		eventCode + EventCode.SEQUENCE_INVOKE,
-                    "Received request for invoke Wallet Fund Transfer",
-                    businessId,
-                    walletFundTransferRequest);
+		HttpEntity<?> rqEntity = new HttpEntity<>(walletFundTransferRequest, getHttpHeadersForInternalCall(userId));
 
-            final String url =
-                    UriComponentsBuilder.fromUriString(walletServiceBaseUrl)
-                            .path(PATH_FUND_TRANSFERS)
-                            .toUriString();
+		var response = restInternal.exchange(url, HttpMethod.POST, rqEntity, ObjectResponseDto.class);
 
-            HttpEntity<?> rqEntity =
-                    new HttpEntity<>(
-                            walletFundTransferRequest, getHttpHeadersForInternalCall(userId));
+		Object object = Optional.ofNullable(response).map(ResponseEntity::getBody).map(ObjectResponseDto::getData)
+				.orElseThrow(
+						() -> ApiResponseException.builder().message(ErrorCodes.ERROR_GETTING_RESPONSE.getMessage())
+								.code(ErrorCodes.ERROR_GETTING_RESPONSE.getCode())
+								.httpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()).build());
 
-            var response =
-                    restInternal.exchange(url, HttpMethod.POST, rqEntity, ObjectResponseDto.class);
+		String json = gson.toJson(object);
 
-            Object object =
-                    Optional.ofNullable(response)
-                            .map(ResponseEntity::getBody)
-                            .map(ObjectResponseDto::getData)
-                            .orElseThrow(
-                                    () ->
-                                            ApiResponseException.builder()
-                                                    .message(
-                                                            ErrorCodes.ERROR_GETTING_RESPONSE
-                                                                    .getMessage())
-                                                    .code(
-                                                            ErrorCodes.ERROR_GETTING_RESPONSE
-                                                                    .getCode())
-                                                    .httpStatus(
-                                                            HttpStatus.INTERNAL_SERVER_ERROR
-                                                                    .value())
-                                                    .build());
+		WalletFundTransferResponse walletFundTransferResponse = gson.fromJson(json, WalletFundTransferResponse.class);
 
-            String json = gson.toJson(object);
+		return walletFundTransferResponse;
+	}
 
-            WalletFundTransferResponse walletFundTransferResponse =
-                    gson.fromJson(json, WalletFundTransferResponse.class);
+	public List<Wallet> getUserWallet(RequestSearchWalletDto requestSearchWalletDto, String useCase, String eventCode) {
 
-            return walletFundTransferResponse;
-        } catch (HttpStatusCodeException exception) {
-            LOGGER.error(
-            		ErrorCodes.ERROR_CALL_WALLET_SERVICE.getMessage(),
-                    exception);
-            eventTracker.traceError(
-                    UseCase.WALLET_FUND_TRANSFER,
-                    EventCode.WALLET_FUND_TRANSFER,
-                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getCode(),
-                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getMessage(),
-                    businessId,
-                    exception);
+		String businessId = String.format("requestSearchWalletDto %s", requestSearchWalletDto.toString());
 
-            throw new InternalServerErrorException(
-                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getCode(),
-                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getMessage(),
-                    "");
-        } catch (ApiResponseException exception) {
-            LOGGER.error(exceptionMsg + "{}", exception);
-            throw exception;
-        }
-    }
-    
-    public List<Wallet> getUserWallet(RequestSearchWalletDto requestSearchWalletDto, String useCase, String eventCode) {
+		LOGGER.info("Getting wallet info for given request search :" + requestSearchWalletDto);
+		eventTracker.traceEvent(useCase, eventCode + EventCode.SEQUENCE_INVOKE,
+				"Request received to invoke get wallet details", businessId, requestSearchWalletDto);
+		try {
+			final String url = UriComponentsBuilder.fromUriString(walletServiceBaseUrl).path(WALLETS)
+					.queryParams(requestSearchWalletDto.getQueryParams()).toUriString();
+			var response = restInternal.exchange(url, HttpMethod.GET, new HttpEntity<>(""), WalletListResponse.class);
+			LOGGER.info("Getting wallet info for given request search response" + gson.toJson(response));
+			WalletListResponse body = response.getBody();
+			if (body != null) {
+				return body.getData();
+			} else {
+				return Collections.emptyList();
+			}
 
-        String businessId =
-                String.format("requestSearchWalletDto %s", requestSearchWalletDto.toString());
+		} catch (Exception e) {
+			LOGGER.error(ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(), e);
+			eventTracker.traceError(useCase, eventCode, ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getCode(),
+					ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(), businessId, e);
+			throw new InternalServerErrorException(ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getCode(),
+					ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(), businessId, e);
+		}
+	}
 
-        LOGGER.info("Getting wallet info for given request search :" + requestSearchWalletDto);
-        eventTracker.traceEvent(
-        		useCase,
-        		eventCode + EventCode.SEQUENCE_INVOKE,
-                "Request received to invoke get wallet details",
-                businessId,
-                requestSearchWalletDto);
-        try {
-            final String url =
-                    UriComponentsBuilder.fromUriString(walletServiceBaseUrl)
-                            .path(WALLETS)
-                            .queryParams(requestSearchWalletDto.getQueryParams())
-                            .toUriString();
-            var response =
-                    restInternal.exchange(
-                            url, HttpMethod.GET, new HttpEntity<>(""), WalletListResponse.class);
-            LOGGER.info(
-                    "Getting wallet info for given request search response"
-                            + gson.toJson(response));
-            WalletListResponse body = response.getBody();
-            if (body != null) {
-                return body.getData();
-            } else {
-                return Collections.emptyList();
-            }
-
-        } catch (Exception e) {
-            LOGGER.error(
-            		ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(),
-                    e);
-            eventTracker.traceError(
-            		useCase,
-            		eventCode,
-                    ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getCode(),
-                    ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(),
-                    businessId,
-                    e);
-            throw new InternalServerErrorException(
-            		ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getCode(), ErrorCodes.ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER.getMessage(), businessId, e);
-        }
-    }
-    
-    private HttpHeaders getHttpHeadersForInternalCall(String userId) {
-        final HttpHeaders headers = new HttpHeaders();
-        String internalServiceJWT = jwtFactory.generateUserToken(userId);
-        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        headers.add(Constants.X_JWT_ASSERTION_HEADER_NAME, internalServiceJWT);
-        return headers;
-    }
+	private HttpHeaders getHttpHeadersForInternalCall(String userId) {
+		final HttpHeaders headers = new HttpHeaders();
+		String internalServiceJWT = jwtFactory.generateUserToken(userId);
+		headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+		headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+		headers.add(Constants.X_JWT_ASSERTION_HEADER_NAME, internalServiceJWT);
+		return headers;
+	}
 }
