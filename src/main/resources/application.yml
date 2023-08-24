@@ -76,4 +76,10 @@ cache:
 # Setting for Membership Service
 membership.server.base-url: http://membership-service:8080
 
-
+configuration:
+  types: ROUNDUP_CONTRIBUTION
+  logic-codes: DEFAULT
+  
+roundUpConfig:
+  eligibleBankTransactionCodes: DuitNowQR,Visa Purchase,MyDebit Purchase
+  type: ROUNDUP_CONTRIBUTION

@@ -10,5 +10,6 @@ import io.marketplace.services.transaction.processing.entity.ConfigurationParamE
 public interface ConfigurationParamRepository extends JpaRepository<ConfigurationParamEntity, UUID> {
 
   List<ConfigurationParamEntity> findByConfigurationId(UUID configurationId);
+  List<ConfigurationParamEntity> findByParamNameAndValue(String paramName, String value);
 
 }
