@@ -23,6 +23,10 @@ spec:
             - mountPath: /apps/conf/keystore.jks
               name: tomcat-ssl
               subPath: keystore.jks
+            - mountPath: /opt/java/openjdk/lib/security/cacerts
+              name: java17-certs
+              subPath: cacerts
+              readOnly: false
           {{ end }}
       restartPolicy: Never
       {{ if .Values.server.ssl.enabled }}
@@ -31,6 +35,10 @@ spec:
           secret:
             defaultMode: 420
             secretName: tomcat-ssl
+        - name: java17-certs
+          secret:
+            defaultMode: 420
+            secretName: java17-certs
       {{ end }}
       {{ if .Values.kubernetes.useSecrets }}
       imagePullSecrets:
