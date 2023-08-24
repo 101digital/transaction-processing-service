@@ -44,7 +44,6 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.kubernetes.imagePullSecrets }}
       {{ end }}
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
