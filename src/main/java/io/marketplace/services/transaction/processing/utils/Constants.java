@@ -5,6 +5,10 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Constants {
 
+	public static final String NOTIFICATION_DATA_KEY_AMOUNT = "amount";
+    public static final String NOTIFICATION_DATA_KEY_CURRENCY = "currency";
+    public static final String NOTIFICATION_DATA_KEY_TIMESTAMP = "timestamp";
+    public static final String NOTIFICATION_DATA_KEY_SAVINGS_POT_NAME = "savingsPotName";
 
     @UtilityClass
     public static class EventTitle {
@@ -29,12 +33,12 @@ public class Constants {
 
         public static final String ADD_CONFIGURATION = "Add Configuration";
         public static final String DELETE_CONFIGURATION = "Delete Configuration";
-        public static final String ACTIVITY_RECEIVE_TRANSACTION_DATA = "Transaction data received for round up configuration";
+        public static final String ACTIVITY_RECEIVE_TRANSACTION_DATA = "Transaction data received for round up contribution";
         public static final String RECEIVE_WALLET_DATA_CHANGED_FROM_KAFKA = "Receive Wallet data changed from Kafka";
         public static final String GET_CONFIGURATIONS = "Get Configurations";
         public static final String UPDATE_CONFIGURATIONS = "Update Configurations";
         public static final String WALLET_FUND_TRANSFER = "Wallet Fund Transfer";
-        public static final String GET_WALLET_ACCOUNT_DETAILS = "Get Wallet Details by Account Number";
+        public static final String GET_WALLET_DETAILS = "Get Wallet Details";
 
     }
 

@@ -39,8 +39,9 @@ public enum ErrorCodes {
     ERROR_WHILE_GET_CONFIGURATIONS("161.01.500.03", "Error while getting configurations"),
     ERROR_GETTING_RESPONSE("161.01.500.04", "Error while getting response"),
     ERROR_CALL_WALLET_SERVICE("161.01.500.05","Error While Calling Wallet Service"),
-    ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER("161.01.500.06","Error While Calling Wallet Service for retrive walletId by account number"),
-    ERROR_UPDATE_CONFIGURATIONS("161.01.500.07","Error While Updating Configurations");
+    ERROR_CALL_WALLET_SERVICE_ACCOUNT_NUMBER("161.01.500.06","Error While Calling Wallet Service for retrive wallet details"),
+    ERROR_UPDATE_CONFIGURATIONS("161.01.500.07","Error While Updating Configurations"),
+	ERROR_WHILE_TRANSFER_PAYMENT("161.01.500.08", "Error while trying to transfer payment .");
 
     private final String code;
     private final String message;

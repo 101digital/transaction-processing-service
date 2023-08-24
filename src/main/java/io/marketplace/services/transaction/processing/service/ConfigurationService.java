@@ -14,7 +14,6 @@ import io.marketplace.services.transaction.processing.model.Configurations;
 import io.marketplace.services.transaction.processing.model.ConfigurationsListResponse;
 import io.marketplace.services.transaction.processing.model.ConfigurationsResponse;
 import io.marketplace.services.transaction.processing.model.PagingInformation;
-import io.marketplace.services.transaction.processing.repository.ConfigurationParamRepository;
 import io.marketplace.services.transaction.processing.repository.ConfigurationRepository;
 import io.marketplace.services.transaction.processing.specification.ConfigurationsSpecification;
 import io.marketplace.services.transaction.processing.utils.ConfigurationUtils;
@@ -24,7 +23,6 @@ import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
 import io.marketplace.services.transaction.processing.utils.EventTrackingService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,8 +42,6 @@ public class ConfigurationService {
     private static final Logger log = LoggerFactory.getLogger(ConfigurationService.class);
 
     @Autowired private ConfigurationRepository configurationRepository;
-
-    @Autowired private ConfigurationParamRepository configurationParamRepository;
 
     @Autowired private ConfigurationUtils configurationUtils;
 
