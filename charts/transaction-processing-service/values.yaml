@@ -1,0 +1,15 @@
+image:
+  tag: 1.0.0-SNAPSHOT
+affinity: {}
+kubernetes:
+  imagePullPolicy: Always
+  useSecrets: true
+  imagePullSecrets: adbsecret
+spring:
+  cloud:
+    config:
+      enabled: true
+      uri: http://configuration-service:8080/
+      label: master
+  liquibase:
+    enabled: false
