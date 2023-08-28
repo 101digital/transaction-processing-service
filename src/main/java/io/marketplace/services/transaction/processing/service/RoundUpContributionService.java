@@ -2,9 +2,11 @@ package io.marketplace.services.transaction.processing.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import com.google.gson.Gson;
 
@@ -20,9 +23,10 @@ import io.marketplace.commons.logging.Logger;
 import io.marketplace.commons.logging.LoggerFactory;
 import io.marketplace.commons.utils.StringUtils;
 import io.marketplace.services.transaction.processing.client.WalletClient;
+import io.marketplace.services.transaction.processing.client.dto.RequestSearchWalletDto;
 import io.marketplace.services.transaction.processing.common.ErrorCodes;
+import io.marketplace.services.transaction.processing.dto.RoundUpNotificationDetails;
 import io.marketplace.services.transaction.processing.dto.Wallet;
-import io.marketplace.services.transaction.processing.dto.WalletListResponse;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest.Account;
 import io.marketplace.services.transaction.processing.dto.WalletFundTransferRequest.CustomField;
@@ -38,6 +42,16 @@ import io.marketplace.services.transaction.processing.dto.openbanking.OBTransact
 import io.marketplace.services.transaction.processing.entity.ConfigurationEntity;
 import io.marketplace.services.transaction.processing.entity.ConfigurationParamEntity;
 import io.marketplace.services.transaction.processing.repository.ConfigurationRepository;
+import io.marketplace.services.transaction.processing.utils.EventTrackingService;
+import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
+import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
+
+import static io.marketplace.services.transaction.processing.utils.Constants.NOTIFICATION_DATA_KEY_AMOUNT;
+import static io.marketplace.services.transaction.processing.utils.Constants.NOTIFICATION_DATA_KEY_CURRENCY;
+import static io.marketplace.services.transaction.processing.utils.Constants.NOTIFICATION_DATA_KEY_SAVINGS_POT_NAME;
+import static io.marketplace.services.transaction.processing.utils.Constants.NOTIFICATION_DATA_KEY_TIMESTAMP;
+import static io.marketplace.services.transaction.processing.utils.FormatterUtil.formatTimestamp;
+import static io.marketplace.services.transaction.processing.utils.FormatterUtil.formatToTwoDecimals;
 
 @Service
 public class RoundUpContributionService {
@@ -48,6 +62,7 @@ public class RoundUpContributionService {
 	private final String CONSUMER_CODE = "ADB";
 	private final String TRANSACTION_TYPE = "OWN_ACCOUNTS_TRANSFER";
 	private final String ROUNDUP_SOURCE_TXN_ID = "ROUNDUP_SOURCE_TXN_ID";
+	private final String INSUFFICIENT_BALANCE_ERROR_MESSAGE = "WITHDRAWAL_PAST_OVERDRAFT_CONSTRAINTS";
 
 	@Value("#{'${roundUpConfig.eligibleBankTransactionCodes}'.split(',')}")
 	private List<String> eligibleBankTransactionCodes;
@@ -57,6 +72,21 @@ public class RoundUpContributionService {
 
 	@Value("${transaction-processing-config.contribution-param-name:contributionWalletId}")
 	private String contributionWalletId;
+	
+	@Value(
+            "${transaction-processing-config.notification.roundoff-contribution-success:roundoff-contribution-success}")
+    private String roundoffContributionSuccess;
+
+    @Value(
+            "${transaction-processing-config.notification.roundoff-contribution-failed:roundoff-contribution-failed}")
+    private String roundoffContributionFailed;
+
+    @Value(
+        "${transaction-processing-config.notification.roundoff-contribution-insufficient-balance-failed:roundoff-contribution-insufficient-balance-failed}")
+    private String roundoffContributionInsufficientBalanceFailed;
+
+    @Value("${transaction-processing-config.notification.timezone:Asia/Kuala_Lumpur}")
+    private String notificationTimezone;
 
 	@Autowired
 	WalletClient walletClient;
@@ -66,6 +96,10 @@ public class RoundUpContributionService {
 
 	@Autowired
 	private ConfigurationRepository configurationRepository;
+	
+	@Autowired private EventTrackingService eventTrackingService;
+	
+	@Autowired private NotificationService notificationService;
 	
 	@Transactional
 	public void processTransaction(OBTransaction6 transaction) {
@@ -81,23 +115,79 @@ public class RoundUpContributionService {
 				.orElse(new OBActiveOrHistoricCurrencyAndAmount9());
 
 		BigDecimal roundUpAmount = getRoundUpAmount(configurationEntity, amount.getAmount());
-
+		String businessId = String.format("Transaction Id: %s", transaction.getTransactionId());
 		if (roundUpAmount.compareTo(BigDecimal.ZERO) > 0) {
-			WalletFundTransferRequest walletFundTransferRequest = toWalletFundTransferRequest(configurationEntity,
-					roundUpAmount, amount.getCurrency());
-			CustomField customField = CustomField.builder()
-					.key(ROUNDUP_SOURCE_TXN_ID)
-					.value(transaction.getTransactionId())
+			String savingsPotName = getSavingsPotName(configurationEntity);
+			RoundUpNotificationDetails roundUpNotificationDetails = RoundUpNotificationDetails.builder()
+					.savingsPotName(savingsPotName)
+					.currency(amount.getCurrency())
+					.amount(roundUpAmount)
+					.userId(transaction.getUserId())
+					.templateName(roundoffContributionSuccess)
 					.build();
-			walletFundTransferRequest.setCustomFields(Collections.singletonList(customField));
-			log.info("Round up WalletFundTransferRequest: {}", gson.toJson(walletFundTransferRequest));
-
-			WalletFundTransferResponse walletFundTransferResponse = walletClient
-					.walletFundTransfer(walletFundTransferRequest, transaction.getUserId());
-			log.info("Round up WalletFundTransferResponse: {}", gson.toJson(walletFundTransferResponse));
+			 try {
+				WalletFundTransferRequest walletFundTransferRequest = toWalletFundTransferRequest(configurationEntity,
+						roundUpAmount, amount.getCurrency());
+				CustomField customField = CustomField.builder()
+						.key(ROUNDUP_SOURCE_TXN_ID)
+						.value(transaction.getTransactionId())
+						.build();
+				walletFundTransferRequest.setCustomFields(Collections.singletonList(customField));
+				log.info("Round up WalletFundTransferRequest: {}", gson.toJson(walletFundTransferRequest));
+	
+				WalletFundTransferResponse walletFundTransferResponse = walletClient
+						.walletFundTransfer(walletFundTransferRequest, transaction.getUserId(),UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,EventCode.EVENT_RECEIVE_TRANSACTION_DATA);
+				log.info("Round up WalletFundTransferResponse: {}", gson.toJson(walletFundTransferResponse));
+				sendPaymentNotification(roundUpNotificationDetails);
+			}catch (HttpStatusCodeException httpStatusCodeException) {
+				log.error(ErrorCodes.ERROR_CALL_WALLET_SERVICE.getMessage(), httpStatusCodeException);
+	            eventTrackingService.traceError(
+	                    UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+	                    EventCode.EVENT_RECEIVE_TRANSACTION_DATA,
+	                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getCode(),
+	                    ErrorCodes.ERROR_CALL_WALLET_SERVICE.getMessage(),
+	                    businessId,
+	                    httpStatusCodeException);
+	            sendFailedPaymentNotification(httpStatusCodeException.getResponseBodyAsString(),roundUpNotificationDetails);
+			} catch (Exception exception) {
+				log.error(ErrorCodes.ERROR_WHILE_TRANSFER_PAYMENT.getMessage(), exception);
+				eventTrackingService.traceError(
+	                    UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+	                    EventCode.EVENT_RECEIVE_TRANSACTION_DATA,
+	                    ErrorCodes.ERROR_WHILE_TRANSFER_PAYMENT.getCode(),
+	                    ErrorCodes.ERROR_WHILE_TRANSFER_PAYMENT.getMessage(),
+	                    businessId,
+	                    exception);
+				sendFailedPaymentNotification(exception.getMessage(),roundUpNotificationDetails);
+			}
 		}
 	}
-
+	
+	private void sendFailedPaymentNotification(String errorMsg, RoundUpNotificationDetails roundUpNotificationDetails) {
+		if (errorMsg.contains(INSUFFICIENT_BALANCE_ERROR_MESSAGE)){
+			roundUpNotificationDetails.setTemplateName(roundoffContributionInsufficientBalanceFailed);
+			sendPaymentNotification(roundUpNotificationDetails);
+		}else {
+			roundUpNotificationDetails.setTemplateName(roundoffContributionFailed);
+			sendPaymentNotification(roundUpNotificationDetails);
+		}
+	}
+	
+	private void sendPaymentNotification(RoundUpNotificationDetails roundUpNotificationDetails) {
+		notificationService.sendNotification(
+                Map.of(
+                        NOTIFICATION_DATA_KEY_AMOUNT,
+                        formatToTwoDecimals(roundUpNotificationDetails.getAmount()),
+                        NOTIFICATION_DATA_KEY_CURRENCY,
+                        roundUpNotificationDetails.getCurrency(),
+                        NOTIFICATION_DATA_KEY_SAVINGS_POT_NAME,
+                        roundUpNotificationDetails.getSavingsPotName(),
+                        NOTIFICATION_DATA_KEY_TIMESTAMP,
+                        formatTimestamp(LocalDateTime.now(), notificationTimezone)),
+                String.valueOf(roundUpNotificationDetails.getUserId()),
+                roundUpNotificationDetails.getTemplateName());
+	}
+	
 	private BigDecimal getRoundUpAmount(ConfigurationEntity configurationEntity, String amount) {
 		switch (configurationEntity.getLogicCode()) {
 		case "TODO":
@@ -159,9 +249,10 @@ public class RoundUpContributionService {
 	}
 
 	private String getWalletIdByAccountNumber(String accountNumber) {
-
-		return Optional.ofNullable(walletClient.getWalletInformationByAccountNumber(accountNumber))
-				.map(WalletListResponse::getData).stream().flatMap(Collection::stream).findFirst()
+		RequestSearchWalletDto requestSearchWalletDto = new RequestSearchWalletDto();
+		requestSearchWalletDto.setAccountNumber(accountNumber);
+		List<Wallet> walletList = walletClient.getUserWallet(requestSearchWalletDto, UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA, EventCode.EVENT_RECEIVE_TRANSACTION_DATA);
+		return Optional.ofNullable(walletList).stream().flatMap(Collection::stream).findFirst()
 				.map(Wallet::getWalletId).orElse(null);
 	}
 
@@ -186,5 +277,20 @@ public class RoundUpContributionService {
 						.build())
 				.build();
 	}
+	
+	private String getSavingsPotName(ConfigurationEntity configurationEntity) {
+		Optional<ConfigurationParamEntity> configurationParamEntity = configurationEntity.getConfigurationParamList()
+				.stream().filter(param -> contributionWalletId.equals(param.getParamName())).findFirst();
+		if (!configurationParamEntity.isPresent()) {
+			throw new BadRequestException(ErrorCodes.ERR_SAVINGS_POT_NOT_FOUND_ERROR.getCode(),
+					ErrorCodes.ERR_SAVINGS_POT_NOT_FOUND_ERROR.getMessage(), "");
+		}
+        RequestSearchWalletDto requestSearchWalletDto = new RequestSearchWalletDto();
+        requestSearchWalletDto.setWalletId(configurationParamEntity.get().getValue());
+        List<Wallet> walletList = walletClient.getUserWallet(requestSearchWalletDto, UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA, EventCode.EVENT_RECEIVE_TRANSACTION_DATA);
+
+        return Optional.ofNullable(walletList).stream().flatMap(Collection::stream).findFirst()
+				.map(Wallet::getWalletName).orElse("");
+    }
 
 }
