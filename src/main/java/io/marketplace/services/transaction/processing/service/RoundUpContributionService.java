@@ -63,6 +63,7 @@ public class RoundUpContributionService {
 	private final String TRANSACTION_TYPE = "OWN_ACCOUNTS_TRANSFER";
 	private final String ROUNDUP_SOURCE_TRANSACTION_ID = "ROUNDUP_SOURCE_TRANSACTION_ID";
 	private final String INSUFFICIENT_BALANCE_ERROR_MESSAGE = "WITHDRAWAL_PAST_OVERDRAFT_CONSTRAINTS";
+	private  final String BALANCE_BELOW_ZERO = "Insufficient balance";
 
 	@Value("#{'${roundUpConfig.eligibleBankTransactionCodes}'.split(',')}")
 	private List<String> eligibleBankTransactionCodes;
@@ -164,7 +165,7 @@ public class RoundUpContributionService {
 	}
 	
 	private void sendFailedPaymentNotification(String errorMsg, RoundUpNotificationDetails roundUpNotificationDetails) {
-		if (errorMsg.contains(INSUFFICIENT_BALANCE_ERROR_MESSAGE)){
+		if (errorMsg.contains(INSUFFICIENT_BALANCE_ERROR_MESSAGE) || errorMsg.contains(BALANCE_BELOW_ZERO)){
 			roundUpNotificationDetails.setTemplateName(roundoffContributionInsufficientBalanceFailed);
 			sendPaymentNotification(roundUpNotificationDetails);
 		}else {
