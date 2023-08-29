@@ -11,4 +11,4 @@ spring:
       uri: ${SPRING_CONFIG_PATH:http://local.conf.101digital.io:8888}
       label: ${SPRING_CONFIG_LABEL:master}
 encrypt:
-    failOnError: true 
+    failOnError: true
