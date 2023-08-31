@@ -64,6 +64,8 @@ public class RoundUpContributionService {
 	private final String ROUNDUP_SOURCE_TRANSACTION_ID = "ROUNDUP_SOURCE_TRANSACTION_ID";
 	private final String INSUFFICIENT_BALANCE_ERROR_MESSAGE = "WITHDRAWAL_PAST_OVERDRAFT_CONSTRAINTS";
 	private  final String BALANCE_BELOW_ZERO = "Insufficient balance";
+	private  final String ACCOUNT_SUB_TYPE = "SavingAccount-i";
+	private  final String ACCOUNT_TYPE = "DEPOSIT";
 
 	@Value("#{'${roundUpConfig.eligibleBankTransactionCodes}'.split(',')}")
 	private List<String> eligibleBankTransactionCodes;
@@ -252,6 +254,9 @@ public class RoundUpContributionService {
 	private String getWalletIdByAccountNumber(String accountNumber) {
 		RequestSearchWalletDto requestSearchWalletDto = new RequestSearchWalletDto();
 		requestSearchWalletDto.setAccountNumber(accountNumber);
+		requestSearchWalletDto.setAccountTypes(Collections.singletonList(ACCOUNT_TYPE));
+		requestSearchWalletDto.setAccountSubTypes(Collections.singletonList(ACCOUNT_SUB_TYPE));
+		
 		List<Wallet> walletList = walletClient.getUserWallet(requestSearchWalletDto, UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA, EventCode.EVENT_RECEIVE_TRANSACTION_DATA);
 		return Optional.ofNullable(walletList).stream().flatMap(Collection::stream).findFirst()
 				.map(Wallet::getWalletId).orElse(null);
