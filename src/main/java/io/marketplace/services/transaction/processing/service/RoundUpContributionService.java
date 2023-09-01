@@ -66,6 +66,7 @@ public class RoundUpContributionService {
 	private  final String BALANCE_BELOW_ZERO = "Insufficient balance";
 	private  final String ACCOUNT_SUB_TYPE = "SavingAccount-i";
 	private  final String ACCOUNT_TYPE = "DEPOSIT";
+	private  final String TRANSACTION_ID = "Transaction Id: %s";
 
 	@Value("#{'${roundUpConfig.eligibleBankTransactionCodes}'.split(',')}")
 	private List<String> eligibleBankTransactionCodes;
@@ -118,7 +119,7 @@ public class RoundUpContributionService {
 				.orElse(new OBActiveOrHistoricCurrencyAndAmount9());
 
 		BigDecimal roundUpAmount = getRoundUpAmount(configurationEntity, amount.getAmount());
-		String businessId = String.format("Transaction Id: %s", transaction.getTransactionId());
+		String businessId = String.format(TRANSACTION_ID, transaction.getTransactionId());
 		if (roundUpAmount.compareTo(BigDecimal.ZERO) > 0) {
 			String savingsPotName = getSavingsPotName(configurationEntity);
 			RoundUpNotificationDetails roundUpNotificationDetails = RoundUpNotificationDetails.builder()
@@ -208,12 +209,20 @@ public class RoundUpContributionService {
 	}
 
 	private Optional<ConfigurationEntity> isTransactionEligible(OBTransaction6 transaction) {
+		String businessId = String.format(TRANSACTION_ID, transaction.getTransactionId());
 		Optional<ConfigurationEntity> optConfig = Optional.empty();
 		log.info("Round up process eligibility check started {}", gson.toJson(transaction));
 		if (OBEntryStatus1Code.COMPLETED != transaction.getStatus()
 				|| OBCreditDebitCode1.DEBIT != transaction.getCreditDebitIndicator()) {
 			log.info("Not Eligible for round up due to Status: {} and CreditDebitIndicator: {} ",
 					transaction.getStatus().getValue(), transaction.getCreditDebitIndicator().getValue());
+			eventTrackingService.traceError(
+                    UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+                    EventCode.EVENT_RECEIVE_TRANSACTION_DATA,
+                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getCode(),
+                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getMessage(),
+                    businessId,
+                    String.format("Status: %s and CreditDebitIndicator: %s", transaction.getStatus().getValue(), transaction.getCreditDebitIndicator().getValue()));
 			return optConfig;
 		}
 
@@ -222,6 +231,13 @@ public class RoundUpContributionService {
 
 		if (!eligibleBankTransactionCodes.contains(bankTransactionCode) || !validateMerchantCategoryCode(transaction)) {
 			log.info("Not Eligible for round up due to not supported bank transaction code: {} or mcc ", bankTransactionCode);
+			eventTrackingService.traceError(
+                    UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+                    EventCode.EVENT_RECEIVE_TRANSACTION_DATA,
+                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getCode(),
+                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getMessage(),
+                    businessId,
+                    String.format("BankTransactionCodes: %s", bankTransactionCode));
 			return optConfig;
 		}
 
@@ -233,12 +249,22 @@ public class RoundUpContributionService {
 		String walletId = getWalletIdByAccountNumber(debitorAccountNumber);
 		log.info("Debitor account walletId {}", walletId);
 		if (walletId != null) {
-			return configurationRepository.findByTypeAndWallet(roundUpConfigType, walletId);
+			optConfig = configurationRepository.findByTypeAndWallet(roundUpConfigType, walletId);
+			if(optConfig.isEmpty()) {
+				eventTrackingService.traceError(
+	                    UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+	                    EventCode.EVENT_RECEIVE_TRANSACTION_DATA,
+	                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getCode(),
+	                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getMessage(),
+	                    businessId,
+	                    String.format("Wallet Id: %s", walletId));
+			}
 		}
 		return optConfig;
 	}
 
 	private boolean validateMerchantCategoryCode(OBTransaction6 transaction) {
+		String businessId = String.format(TRANSACTION_ID, transaction.getTransactionId());
 		String mcc = Stream
 				.of((String) transaction.getSupplementaryData().getOrDefault(MERCHANT_CATERGORY_CODE, EMPTY_VALUE),
 						Optional.ofNullable(transaction).map(OBTransaction6::getMerchantDetails)
@@ -246,6 +272,13 @@ public class RoundUpContributionService {
 				.filter(str -> !str.isEmpty()).findFirst().orElse(EMPTY_VALUE);
 		if (StringUtils.isEmpty(mcc) || "0000".equals(mcc)) {
 			log.info("Merchant category Code not supported {}", mcc);
+			eventTrackingService.traceError(
+                    UseCase.ACTIVITY_RECEIVE_TRANSACTION_DATA,
+                    EventCode.EVENT_RECEIVE_TRANSACTION_DATA,
+                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getCode(),
+                    ErrorCodes.INVALID_ROUNDUP_ELIGIBLE.getMessage(),
+                    businessId,
+                    String.format("MCC: %s", mcc));
 			return false;
 		}
 		return true;
