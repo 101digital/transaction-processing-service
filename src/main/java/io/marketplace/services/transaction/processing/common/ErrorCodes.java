@@ -25,6 +25,7 @@ public enum ErrorCodes {
     MISSING_DEBITOR_ACCOUNT("161.01.400.07", "Missing debitor identification in transaction data change event"),
     INVALID_CONFIGURATION_ID("161.01.400.14", "Invalid ConfigurationID"),
     INVALID_WALLET_ID("161.01.400.15", "Invalid WalletId"),
+    INVALID_ROUNDUP_ELIGIBLE("161.01.400.16", "Transaction not eligible for round up contribution"),
 
     // 403
 
