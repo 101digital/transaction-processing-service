@@ -36,7 +36,7 @@ public class FormatterUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(FormatterUtil.class);
 
     private static final DecimalFormat TWO_DECIMAL_FORMAT = new DecimalFormat("0.00");
-    private static final DateTimeFormatter DATE_TIME_FORMATTER_TO = DateTimeFormatter.ofPattern("dd MMM yyyy',' hh:mm:ss a");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER_TO = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss a");
     private static final DateTimeFormatter DATE_TIME_FORMATTER_FROM = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     private FormatterUtil(){}
