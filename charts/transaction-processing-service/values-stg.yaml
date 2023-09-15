@@ -10,4 +10,4 @@ spring:
     config:
       enabled: true
       uri: http://configuration-service:8080/
-      label: adb-develop
+      label: master
