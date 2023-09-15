@@ -1,5 +1,6 @@
 package io.marketplace.services.transaction.processing;
 
+import io.marketplace.commons.application.BaseSpringBootApplication;
 import io.marketplace.commons.logging.Logger;
 import io.marketplace.commons.logging.LoggerFactory;
 import io.marketplace.commons.validator.BankInformationCache;
@@ -22,7 +23,7 @@ import java.util.TimeZone;
 @ComponentScan(basePackages = {"io.marketplace.services", "io.marketplace.commons"}, excludeFilters={
         @ComponentScan.Filter(type= FilterType.ASSIGNABLE_TYPE, value= BankInformationCache.class)})
 @EnableTransactionManagement
-public class TransactionProcessingApplication {
+public class TransactionProcessingApplication extends BaseSpringBootApplication {
     private static final Logger log = LoggerFactory.getLogger(TransactionProcessingApplication.class);
     @Autowired private BuildProperties buildProperties;
     @Value("${app-config.server.timezone:UTC}")
