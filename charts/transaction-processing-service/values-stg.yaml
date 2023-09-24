@@ -1,5 +1,7 @@
 image:
   tag: 1.0.0-SNAPSHOT
+kubernetes:
+  protocol: HTTP
 server:
   ssl:
     enabled: false

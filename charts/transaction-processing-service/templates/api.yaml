@@ -121,7 +121,7 @@ spec:
     - name: http
       protocol: TCP
       port: 8080
-      targetPort: {{ .Values.port | default 8081 }}
+      targetPort: {{ .Values.port | default 8080 }}
     {{ end }}
     - name: monitoring
       port: 8081
