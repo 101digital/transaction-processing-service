@@ -305,10 +305,12 @@ public class ConfigurationService {
                             ErrorCodes.INVALID_WALLET_ID.getMessage(),
                             businessId);
                 }
-
-                if (!StringUtils.isEmpty(configurations.getLogicCode())) {
-                    if (configurationLogicCodes.contains(configurations.getLogicCode())) {
-                        configurationEntity.setLogicCode(configurations.getLogicCode());
+                String logicCode = Optional.ofNullable(configurations)
+                    .map(Configurations::getLogicCode)
+                    .orElse("");
+                if (!StringUtils.isEmpty(logicCode)) {
+                    if (configurationLogicCodes.contains(logicCode)) {
+                        configurationEntity.setLogicCode(logicCode);
                     } else {
                         throw new BadRequestException(
                                 ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getCode(),
@@ -319,9 +321,13 @@ public class ConfigurationService {
 
             try {
 
+        Object supplementaryDataObj =
+            Optional.ofNullable(configurations)
+                .map(Configurations::getSupplementaryData)
+                .orElse(new Object());
                 Map<String, String> supplementaryData =
                         gson.fromJson(
-                                gson.toJson(configurations.getSupplementaryData()), Map.class);
+                                gson.toJson(supplementaryDataObj), Map.class);
 
                 List<ConfigurationParamEntity> configurationParamEntityList =
                         configurationEntity.getConfigurationParamList();

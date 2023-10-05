@@ -32,17 +32,4 @@ public class TransactionProcessingApplication extends BaseSpringBootApplication 
     public static void main(String[] args) {
         SpringApplication.run(TransactionProcessingApplication.class, args);
     }
-
-    @PostConstruct
-    private void started() {
-        TimeZone.setDefault(TimeZone.getTimeZone(timezone));
-        log.info(
-                "Application version {}, build time: {}, gitCommit: {}, jdk: {}, timezone: {}",
-                buildProperties.getVersion(),
-                LocalDateTime.ofInstant(buildProperties.getTime(), ZoneOffset.UTC),
-                buildProperties.get("gitCommitId"),
-                System.getProperty("java.version"),
-                timezone
-          );
-    }
 }
