@@ -2,18 +2,24 @@ openapi: 3.0.1
 info:
   title: Transaction Processing Service
   version: 1.0.0
-  description: Transaction Processing Service
+  description: The Transaction Processing Service is responsible for the post-processing of Transactions. One   example of such post processing is where an additional Round Up Transaction is generated. 
+
+     Users can define configurations on their wallets to execute processes after a transaction is completed. 
   x-custom-info:
     authors:
       name: Dasun Anushka
       email: lakmal.thanthrige@101digital.io
+tags: 
+  - name: Configurations
+    description: Manage Configuraitons
 servers:
   - url: 'http://localhost:8090'
 paths:
   /configurations:
     post:
       operationId: addConfigurations
-      summary: Create configurations
+      summary: Create Round Up Contribution
+      description: Configure Round Up settings for the wallet targeting to a specific savings pot
       tags:
         - Configurations
       requestBody:
@@ -49,7 +55,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     get:
       operationId: getConfigurations
-      summary: Get configurations
+      summary: Get Round Up Contribution
+      description: Get Round up settings of the wallet
       tags:
         - Configurations
       parameters:
@@ -115,7 +122,8 @@ paths:
     delete:
       tags:
         - Configurations
-      summary: Delete the configuration using configuration id
+      summary: Delete Round Up Contribution
+      description: Delete Round Up settings configured
       operationId: deleteConfigurationById
       parameters:
         - name: configurationId
@@ -167,7 +175,8 @@ paths:
     put:
       tags:
         - Configurations
-      summary: Update the configuration using configuration ID.
+      summary: Update Round Up Contribution
+      description: Change Round Up settings of the wallet targeting different saving pot
       operationId: updateConfigurationById
       requestBody:
         required: true
