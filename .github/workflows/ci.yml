@@ -38,7 +38,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: adb/workflows/.github/workflows/java-backend-pipeline.yml@feature/semver-bump-test
+    uses: adb/workflows/.github/workflows/java-backend-pipeline.yml@feature/DSO-224
     with:
       java-version: ${{inputs.java-version}}
       env: ${{ github.event_name != 'workflow_dispatch' && 'dev' || inputs.env }}
