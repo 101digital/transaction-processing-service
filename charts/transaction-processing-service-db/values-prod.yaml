@@ -5,4 +5,7 @@ server:
     enabled: true
 spring:
   profiles:
-    active: adb-dev
+    active: adb-prod
+  cloud:
+    config:
+      label: APE-2506-prod-preparation
