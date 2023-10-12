@@ -401,3 +401,8 @@ prod:
   <<: *default_settings
   app_name: 'transaction-processing-service (Prod)'
   agent_enabled: true
+
+dr:
+  <<: *default_settings
+  app_name: 'transaction-processing-service (DR)'
+  agent_enabled: true
