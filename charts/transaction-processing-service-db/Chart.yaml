@@ -1,5 +1,5 @@
 apiVersion: v2
-name: transaction-processing-db
+name: transaction-processing-service-db
 description: Transaction Processing Service DB
 type: application
 version: 1.0.0
