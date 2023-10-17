@@ -2,14 +2,13 @@ openapi: 3.0.1
 info:
   title: Transaction Processing Service
   version: 1.0.0
-  description: The Transaction Processing Service is responsible for the post-processing of Transactions. One   example of such post processing is where an additional Round Up Transaction is generated. 
-
-     Users can define configurations on their wallets to execute processes after a transaction is completed. 
+  description: The Transaction Processing Service is responsible for the post-processing of Transactions. One example of such post processing is where an additional Round Up Transaction is generated.
+      Users can define configurations on their wallets to execute processes after a transaction is completed.
   x-custom-info:
     authors:
       name: Dasun Anushka
       email: lakmal.thanthrige@101digital.io
-tags: 
+tags:
   - name: Configurations
     description: Manage Configuraitons
 servers:
