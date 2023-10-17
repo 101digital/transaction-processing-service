@@ -10,3 +10,4 @@ spring:
   cloud:
     config:
       label: APE-2506-prod-preparation
+JAVA_OPTS: -Dnewrelic.environment=prod
