@@ -50,7 +50,7 @@ public class WalletClient {
 	@Autowired
 	private Gson gson;
 
-	@Value("${wallet-service-base-url:http://wallet-service:8080}")
+	@Value("${account-service-base-url:http://wallet-service:8080}")
 	private String walletServiceBaseUrl;
 
 	@Autowired
