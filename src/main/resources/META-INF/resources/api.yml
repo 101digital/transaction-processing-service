@@ -128,11 +128,12 @@ paths:
       parameters:
         - name: configurationId
           in: path
-          description: configuration id
+          description: Configuration Id
           required: true
           schema:
             type: string
-          example: 123
+            format: UUID
+          example: 8837e900-d8a3-487f-9092-46c0924af7db
       responses:
         503:
           description: Internal server error
@@ -187,11 +188,12 @@ paths:
       parameters:
         - name: configurationId
           in: path
-          description: configuration id
+          description: Configuration Id
           required: true
           schema:
             type: string
-          example: 123
+            format: UUID
+          example: 8837e900-d8a3-487f-9092-46c0924af7db
       responses:
         503:
           description: Internal server error
@@ -279,34 +281,63 @@ components:
       properties:
         code:
           type: string
+          example: 161.01.500.01
+          description: Code of Response Status
         message:
           type: string
+          example: Error While Adding Configuration.
+          description: Explanational message of Response Status and Code
     Configurations:
       type: object
       properties:
         id:
           type: UUID
+          example: 8837e900-d8a3-487f-9092-46c0924af7db
+          description: The unique ID (primary key) for the record
+          required: true
         type:
           type: string
+          example: ROUNDUP_CONTRIBUTION
+          description: Type of the configuration
+          required: true
         walletId:
           type: string
+          example: 18763-97894-12462-76013
+          description: Source Wallet id of the transaction considered to be processed
+          required: true
         logicCode:
           type: string
+          example: DEFAULT
+          description: The Identifier which logic to use for the round up
+          required: true
         createdBy:
           type: UUID
+          example: d43aa779-d77b-4265-960e-7b1b5fecb6ae
+          description: The user (user id) who created the record
+          required: false
         updatedby:
           type: UUID
+          example: d43aa779-d77b-4265-960e-7b1b5fecb6ae
+          description: The user (user id) who last updated the record
+          required: false
         createdAt:
           type: string
           format: date-time
+          example: 2023-09-20 13:17:15.790217+00
+          description: The date & time when the record was created
+          required: true
         updatedAt:
           type: string
           format: date-time
+          example: 2023-09-20 13:17:15.790217+00
+          description: The date & time when the record was last updated
+          required: false
         supplementaryData:
           $ref: '#/components/schemas/OBSupplementaryData1'
     OBSupplementaryData1:
       type: object
       description: Additional information that can not be captured in the structured fields and/or any other specific block.
+      example: '"contributionWalletId": "18763-97894-12462-76013"'
     ConfigurationsResponse:
       type: object
       properties:
