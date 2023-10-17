@@ -30,10 +30,10 @@
         <maven.deploy.plugin.version>2.8</maven.deploy.plugin.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
 
-        <marketplace.api.common.version>2.0.0-SNAPSHOT</marketplace.api.common.version>
+        <marketplace.api.common.version>2.0.1-SNAPSHOT</marketplace.api.common.version>
         <marketplace.jwt.common.version>2.0.0-SNAPSHOT</marketplace.jwt.common.version>
         <marketplace.exception.common.version>2.0.0-SNAPSHOT</marketplace.exception.common.version>
-        <marketplace.utils.version>2.0.0-SNAPSHOT</marketplace.utils.version>
+        <marketplace.utils.version>2.0.1-SNAPSHOT</marketplace.utils.version>
         <marketplace.logging.common.version>2.0.0-SNAPSHOT</marketplace.logging.common.version>
         <marketplace.logging.impl.common.version>2.0.0-SNAPSHOT</marketplace.logging.impl.common.version>
 
