@@ -3,7 +3,6 @@ package io.marketplace.services.transaction.processing.config;
 import io.marketplace.commons.logging.Logger;
 import io.marketplace.commons.logging.LoggerFactory;
 import io.marketplace.services.pxchange.client.common.DataConstants;
-import io.marketplace.services.pxchange.client.config.KafkaExtraProperties;
 import java.util.Map;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -24,7 +23,7 @@ import org.springframework.util.StringUtils;
  * Kafka Producer configuration class.
  */
 @Configuration
-@ComponentScan(basePackageClasses = {KafkaExtraProperties.class})
+@ComponentScan
 public class KafkaProducerConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaProducerConfig.class);
@@ -37,9 +36,6 @@ public class KafkaProducerConfig {
 
     @Value("${kafka.consumer.number-processor:2}")
     private int numberProcessor;
-
-    @Autowired
-    private KafkaExtraProperties appProps;
 
     @Autowired(required = false)
     private KafkaProperties kafkaProperties;
@@ -56,11 +52,6 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        if (!StringUtils.isEmpty(appProps.getJaasConfig())) {
-            props.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, DataConstants.SECURITY_PROTOCOL_CONFIG_KEY);
-            String jaasCfg = appProps.getJaasConfig();
-            props.put(DataConstants.SASL_JAAS_CONFIG_KEY, jaasCfg);
-        }
         return props;
     }
 
@@ -68,11 +59,6 @@ public class KafkaProducerConfig {
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = kafkaProperties.buildProducerProperties();
         configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        if (!StringUtils.isEmpty(appProps.getJaasConfig())) {
-            configs.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, DataConstants.SECURITY_PROTOCOL_CONFIG_KEY);
-            String jaasCfg = appProps.getJaasConfig();
-            configs.put(DataConstants.SASL_JAAS_CONFIG_KEY, jaasCfg);
-        }
         return new KafkaAdmin(configs);
     }
 
