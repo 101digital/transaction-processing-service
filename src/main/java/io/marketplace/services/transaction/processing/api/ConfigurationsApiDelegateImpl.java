@@ -4,6 +4,7 @@ import io.marketplace.services.transaction.processing.model.Configurations;
 import io.marketplace.services.transaction.processing.model.ConfigurationsListResponse;
 import io.marketplace.services.transaction.processing.model.ConfigurationsResponse;
 import io.marketplace.services.transaction.processing.service.ConfigurationService;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +23,7 @@ public class ConfigurationsApiDelegateImpl implements ConfigurationsApiDelegate 
     }
 
     @Override
-    public ResponseEntity<String> deleteConfigurationById(String configurationId) {
+    public ResponseEntity<Void> deleteConfigurationById(UUID configurationId) {
         configurationService.deleteConfigurationById(configurationId);
         return ResponseEntity.noContent().build();
     }
@@ -37,7 +38,7 @@ public class ConfigurationsApiDelegateImpl implements ConfigurationsApiDelegate 
     }
 
     @Override
-    public ResponseEntity<ConfigurationsResponse> updateConfigurationById(String configurationId,
+    public ResponseEntity<ConfigurationsResponse> updateConfigurationById(UUID configurationId,
         Configurations configurations) {
 
         return ResponseEntity.ok().body(configurationService.updateConfigurationById(configurationId,configurations));

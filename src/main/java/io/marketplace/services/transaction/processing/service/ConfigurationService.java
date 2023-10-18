@@ -69,7 +69,6 @@ public class ConfigurationService {
             ConfigurationEntity configurationEntity =
                     configurationUtils.toConfigurationEntity(configurations);
 
-
             List<ConfigurationParamEntity> list =
                     configurationUtils.toConfigurationParamEntity(
                             configurations.getSupplementaryData(), configurationEntity.getId());
@@ -105,7 +104,7 @@ public class ConfigurationService {
     }
 
     @Transactional
-    public void deleteConfigurationById(String configurationId) {
+    public void deleteConfigurationById(UUID configurationId) {
 
         String businessId = String.format("Configuration Id: %s", configurationId);
 
@@ -116,17 +115,16 @@ public class ConfigurationService {
                 businessId,
                 configurationId);
 
-        Optional<ConfigurationEntity> optConfig =
-                configurationRepository.findById(UUID.fromString(configurationId));
+        Optional<ConfigurationEntity> optConfig = configurationRepository.findById(configurationId);
         if (!optConfig.isPresent()) {
             throw new NotFoundException(
                     ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getCode(),
                     ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getMessage(),
-                    configurationId);
+                    configurationId.toString());
         }
 
         try {
-            configurationRepository.deleteById(UUID.fromString(configurationId));
+            configurationRepository.deleteById(configurationId);
 
             eventTrackingService.traceEvent(
                     UseCase.DELETE_CONFIGURATION,
@@ -148,7 +146,7 @@ public class ConfigurationService {
             throw new InternalServerErrorException(
                     ErrorCodes.ERR_DELETE_DB_ERROR.getCode(),
                     ErrorCodes.ERR_DELETE_DB_ERROR.getMessage(),
-                    configurationId);
+                    configurationId.toString());
         }
     }
 
@@ -251,7 +249,7 @@ public class ConfigurationService {
     }
 
     public ConfigurationsResponse updateConfigurationById(
-            String configurationId, Configurations configurations) {
+            UUID configurationId, Configurations configurations) {
 
         String businessId =
                 String.format(
@@ -271,7 +269,7 @@ public class ConfigurationService {
                 configurationId);
 
         Optional<ConfigurationEntity> optionalConfigurationEntity =
-                configurationRepository.findById(UUID.fromString(configurationId));
+                configurationRepository.findById(configurationId);
 
         if (!optionalConfigurationEntity.isPresent()) {
             throw new BadRequestException(
@@ -280,42 +278,42 @@ public class ConfigurationService {
                     businessId);
         } else {
 
-                ConfigurationEntity configurationEntity = optionalConfigurationEntity.get();
+            ConfigurationEntity configurationEntity = optionalConfigurationEntity.get();
 
-                if (!configurationEntity
-                        .getType()
-                        .equalsIgnoreCase(
-                                Optional.ofNullable(configurations)
-                                        .map(Configurations::getType)
-                                        .orElse(""))) {
+            if (!configurationEntity
+                    .getType()
+                    .equalsIgnoreCase(
+                            Optional.ofNullable(configurations)
+                                    .map(Configurations::getType)
+                                    .orElse(""))) {
+                throw new BadRequestException(
+                        ErrorCodes.INVALID_CONFIGURATION_TYPE.getCode(),
+                        ErrorCodes.INVALID_CONFIGURATION_TYPE.getMessage(),
+                        businessId);
+            }
+
+            if (!configurationEntity
+                    .getWallet()
+                    .equalsIgnoreCase(
+                            Optional.ofNullable(configurations)
+                                    .map(Configurations::getWalletId)
+                                    .orElse(""))) {
+                throw new BadRequestException(
+                        ErrorCodes.INVALID_WALLET_ID.getCode(),
+                        ErrorCodes.INVALID_WALLET_ID.getMessage(),
+                        businessId);
+            }
+
+            if (!StringUtils.isEmpty(configurations.getLogicCode())) {
+                if (configurationLogicCodes.contains(configurations.getLogicCode())) {
+                    configurationEntity.setLogicCode(configurations.getLogicCode());
+                } else {
                     throw new BadRequestException(
-                            ErrorCodes.INVALID_CONFIGURATION_TYPE.getCode(),
-                            ErrorCodes.INVALID_CONFIGURATION_TYPE.getMessage(),
+                            ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getCode(),
+                            ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getMessage(),
                             businessId);
                 }
-
-                if (!configurationEntity
-                        .getWallet()
-                        .equalsIgnoreCase(
-                                Optional.ofNullable(configurations)
-                                        .map(Configurations::getWalletId)
-                                        .orElse(""))) {
-                    throw new BadRequestException(
-                            ErrorCodes.INVALID_WALLET_ID.getCode(),
-                            ErrorCodes.INVALID_WALLET_ID.getMessage(),
-                            businessId);
-                }
-
-                if (!StringUtils.isEmpty(configurations.getLogicCode())) {
-                    if (configurationLogicCodes.contains(configurations.getLogicCode())) {
-                        configurationEntity.setLogicCode(configurations.getLogicCode());
-                    } else {
-                        throw new BadRequestException(
-                                ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getCode(),
-                                ErrorCodes.INVALID_CONFIGURATION_LOGIC_CODE.getMessage(),
-                                businessId);
-                    }
-                }
+            }
 
             try {
 
@@ -343,8 +341,7 @@ public class ConfigurationService {
                                                                             .builder()
                                                                             .id(UUID.randomUUID())
                                                                             .configurationId(
-                                                                                    UUID.fromString(
-                                                                                            configurationId))
+                                                                                    configurationId)
                                                                             .paramName(
                                                                                     entry.getKey())
                                                                             .value(entry.getValue())
