@@ -116,7 +116,7 @@ public class ConfigurationService {
                 configurationId);
 
         Optional<ConfigurationEntity> optConfig = configurationRepository.findById(configurationId);
-        if (!optConfig.isPresent()) {
+        if (optConfig.isEmpty()) {
             throw new NotFoundException(
                     ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getCode(),
                     ErrorCodes.ERR_DELETE_CONFIGURATION_NOT_FOUND_ERROR.getMessage(),
@@ -329,29 +329,25 @@ public class ConfigurationService {
 
                 List<ConfigurationParamEntity> temp = new ArrayList<>();
 
-                supplementaryData.entrySet().stream()
-                        .forEach(
-                                entry -> {
-                                    configurationParamEntityList.stream()
-                                            .forEach(
-                                                    param -> {
-                                                        if (param.getParamName()
-                                                                .equalsIgnoreCase(entry.getKey())) {
-                                                            param.setValue(entry.getValue());
-                                                        } else {
-                                                            temp.add(
-                                                                    ConfigurationParamEntity
-                                                                            .builder()
-                                                                            .id(UUID.randomUUID())
-                                                                            .configurationId(
-                                                                                    configurationId)
-                                                                            .paramName(
-                                                                                    entry.getKey())
-                                                                            .value(entry.getValue())
-                                                                            .build());
-                                                        }
-                                                    });
-                                });
+                if (supplementaryData != null) {
+                    supplementaryData.forEach(
+                            (key, value) ->
+                                    configurationParamEntityList.forEach(
+                                            param -> {
+                                                if (param.getParamName().equalsIgnoreCase(key)) {
+                                                    param.setValue(value);
+                                                } else {
+                                                    temp.add(
+                                                            ConfigurationParamEntity.builder()
+                                                                    .id(UUID.randomUUID())
+                                                                    .configurationId(
+                                                                            configurationId)
+                                                                    .paramName(key)
+                                                                    .value(value)
+                                                                    .build());
+                                                }
+                                            }));
+                }
 
                 configurationParamEntityList.addAll(temp);
 
