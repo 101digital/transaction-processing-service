@@ -1,6 +1,7 @@
 kubernetes:
   protocol: HTTP
 server:
+  port: 8080
   ssl:
     enabled: false
 spring:
