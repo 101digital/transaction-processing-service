@@ -317,9 +317,12 @@ public class ConfigurationService {
 
             try {
 
-                Map<String, String> supplementaryData =
-                        gson.fromJson(
-                                gson.toJson(configurations.getSupplementaryData()), Map.class);
+                Map<String, String> supplementaryData = null;
+                if (configurations != null) {
+                    supplementaryData =
+                            gson.fromJson(
+                                    gson.toJson(configurations.getSupplementaryData()), Map.class);
+                }
 
                 List<ConfigurationParamEntity> configurationParamEntityList =
                         configurationEntity.getConfigurationParamList();
