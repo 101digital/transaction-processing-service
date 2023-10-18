@@ -271,7 +271,7 @@ public class ConfigurationService {
         Optional<ConfigurationEntity> optionalConfigurationEntity =
                 configurationRepository.findById(configurationId);
 
-        if (!optionalConfigurationEntity.isPresent()) {
+        if (optionalConfigurationEntity.isEmpty()) {
             throw new BadRequestException(
                     ErrorCodes.INVALID_CONFIGURATION_ID.getCode(),
                     ErrorCodes.INVALID_CONFIGURATION_ID.getMessage(),
@@ -304,7 +304,7 @@ public class ConfigurationService {
                         businessId);
             }
 
-            if (!StringUtils.isEmpty(configurations.getLogicCode())) {
+            if (configurations != null && !StringUtils.isEmpty(configurations.getLogicCode())) {
                 if (configurationLogicCodes.contains(configurations.getLogicCode())) {
                     configurationEntity.setLogicCode(configurations.getLogicCode());
                 } else {

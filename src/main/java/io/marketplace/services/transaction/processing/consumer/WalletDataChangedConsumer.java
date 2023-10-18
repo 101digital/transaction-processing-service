@@ -115,7 +115,7 @@ public class WalletDataChangedConsumer {
 
     private boolean validateEvent(EventMessage<Wallet> eventMessage) {
         if (eventMessage == null || eventMessage.getEventType() != EventType.UPDATE) {
-            log.info("received event is not update event: {}", eventMessage.getEventType());
+            log.info("received event is not update event: {}", eventMessage);
             return false;
         }
 
