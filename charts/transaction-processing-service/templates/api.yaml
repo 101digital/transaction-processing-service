@@ -30,6 +30,8 @@ spec:
                 configMapKeyRef:
                   name: transaction-processing-service-config
                   key: config.json
+            - name: JAVA_OPTS
+              value: {{ .Values.JAVA_OPTS | default "-Dnewrelic.environment=default" }}
           readinessProbe:
             failureThreshold: {{ .Values.kubernetes.readinessFailureThreshold | default 2 }}
             httpGet:
