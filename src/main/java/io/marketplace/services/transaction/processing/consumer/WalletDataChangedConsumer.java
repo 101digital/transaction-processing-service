@@ -143,7 +143,7 @@ public class WalletDataChangedConsumer {
     	List<ConfigurationParamEntity> configurationParamList = configurationParamRepository.findByParamNameAndValue(contributionWalletId,wallet.getWalletId());
     	
     	configurationParamList.forEach(configurationParamEntity -> {
-    		configurationService.deleteConfigurationById(configurationParamEntity.getConfigurationId().toString());
+    		configurationService.deleteConfigurationById(configurationParamEntity.getConfigurationId());
     	});
     }
 
