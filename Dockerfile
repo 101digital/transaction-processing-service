@@ -10,4 +10,4 @@ COPY newrelic/ ./newrelic/
 
 EXPOSE 8080
 
-CMD java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=$ENVIRONMENT -javaagent:./newrelic/newrelic.jar -jar ./app.jar
+CMD java ${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=$ENVIRONMENT -javaagent:./newrelic/newrelic.jar -jar ./app.jar
