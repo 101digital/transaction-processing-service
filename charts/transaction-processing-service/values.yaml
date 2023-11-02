@@ -15,7 +15,7 @@ spring:
   liquibase:
     enabled: false
 hpa:
-  targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 70
-  minReplicas: 3
-  maxReplicas: 10
+  targetCPUUtilizationPercentage: 90
+  targetMemoryUtilizationPercentage: 90
+  minReplicas: 1
+  maxReplicas: 3

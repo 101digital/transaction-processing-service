@@ -7,4 +7,3 @@ server:
 spring:
   profiles:
     active: adb-dr,adb-prod
-JAVA_OPTS: -Dnewrelic.environment=dr

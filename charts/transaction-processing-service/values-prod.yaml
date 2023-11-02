@@ -12,3 +12,8 @@ spring:
       label: APE-2506-prod-preparation
 datadog:
   env: prod
+hpa:
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
+  minReplicas: 3
+  maxReplicas: 10
