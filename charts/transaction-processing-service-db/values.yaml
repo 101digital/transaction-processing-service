@@ -1,4 +1,5 @@
 image:
+  name: transaction-processing-service
   tag: <image-tag>
 affinity: {}
 kubernetes:

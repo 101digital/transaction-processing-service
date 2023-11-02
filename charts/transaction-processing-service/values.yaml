@@ -1,4 +1,5 @@
 image:
+  name: transaction-processing-service
   tag: <image-tag>
 affinity: {}
 kubernetes:
@@ -13,4 +14,8 @@ spring:
       label: master
   liquibase:
     enabled: false
-#JAVA_OPTS: -Dnewrelic.environment=default
+hpa:
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
+  minReplicas: 3
+  maxReplicas: 10
