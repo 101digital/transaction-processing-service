@@ -11,6 +11,7 @@ spring:
     config:
       label: APE-2506-prod-preparation
 datadog:
+  enabled: true
   env: prod
 hpa:
   targetCPUUtilizationPercentage: 70

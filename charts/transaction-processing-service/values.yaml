@@ -19,3 +19,6 @@ hpa:
   targetMemoryUtilizationPercentage: 90
   minReplicas: 1
   maxReplicas: 3
+datadog:
+  enabled: false
+  env: dev
