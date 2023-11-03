@@ -6,4 +6,6 @@ server:
 spring:
   profiles:
     active: adb-dev
-#JAVA_OPTS: -Dnewrelic.environment=dev
+  cloud:
+    config:
+      label: APE-2506-prod-preparation
