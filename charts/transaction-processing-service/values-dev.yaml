@@ -1,8 +1,8 @@
 kubernetes:
-  protocol: HTTPS
+  protocol: HTTP
 server:
   ssl:
-    enabled: true
+    enabled: false
 spring:
   profiles:
     active: adb-dev
