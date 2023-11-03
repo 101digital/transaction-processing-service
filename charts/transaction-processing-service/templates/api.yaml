@@ -94,7 +94,7 @@ spec:
             limits:
               memory: {{ .Values.kubernetes.resourcesLimitsMemory | default "2048Mi" }}
             requests:
-              cpu: {{ .Values.kubernetes.resourcesRequestsCpu | default "0.6" }}
+              cpu: {{ .Values.kubernetes.resourcesRequestsCpu | default "0.8" }}
               memory: {{ .Values.kubernetes.resourcesRequestsMemory | default "1024Mi" }}
       {{ if .Values.server.ssl.enabled }}
       volumes:
