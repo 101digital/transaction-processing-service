@@ -1,34 +1,33 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: transaction-processing-service-db
+  name: {{ .Release.Name }}
 spec:
   template:
     metadata:
       labels:
-        app: transaction-processing-service-db
+        app: {{ .Release.Name }}
     spec:
       containers:
-        - image: containers.github.acsdigital.dev/adb/transaction-processing-service:{{ .Values.image.tag }}
-          name: transaction-processing-service
+        - image: "containers.github.acsdigital.dev/adb/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          name: {{ .Values.image.name  }}
           imagePullPolicy: {{ .Values.kubernetes.imagePullPolicy }}
           env:
             - name: SPRING_APPLICATION_JSON
               valueFrom:
                 configMapKeyRef:
-                  name: transaction-processing-service-db-config
+                  name: {{ .Release.Name }}-config
                   key: config.json
           {{ if .Values.server.ssl.enabled }}
           volumeMounts:
-            - mountPath: /apps/conf/keystore.jks
-              name: tomcat-ssl
-              subPath: keystore.jks
-            - mountPath: /opt/java/openjdk/lib/security/cacerts
-              name: java17-certs
-              subPath: cacerts
-              readOnly: false
+          - mountPath: /apps/conf/keystore.jks
+            name: tomcat-ssl
+            subPath: keystore.jks
+          - mountPath: /opt/java/openjdk/lib/security/cacerts
+            name: java17-certs
+            subPath: cacerts
+            readOnly: false
           {{ end }}
-      restartPolicy: Never
       {{ if .Values.server.ssl.enabled }}
       volumes:
         - name: tomcat-ssl
@@ -40,6 +39,7 @@ spec:
             defaultMode: 420
             secretName: java17-certs
       {{ end }}
+      restartPolicy: Never
       {{ if .Values.kubernetes.useSecrets }}
       imagePullSecrets:
         - name: {{ .Values.kubernetes.imagePullSecrets }}
@@ -48,7 +48,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: transaction-processing-service-db-config
+  name: {{ .Release.Name }}-config
 data:
   config.json:
     '{

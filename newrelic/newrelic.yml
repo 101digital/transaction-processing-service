@@ -379,22 +379,30 @@ common: &default_settings
 # For example, to change the app_name setting.
 # Use -Dnewrelic.environment=<environment> on the Java startup command line
 # to set the environment.
-# The default environment is production.
 
 # NOTE if your application has other named environments, you should
 # provide configuration settings for these environments here.
 
-development:
+default:
+  <<: *default_settings
+  agent_enabled: false
+
+dev:
   <<: *default_settings
   app_name: 'transaction-processing-service (Development)'
+  agent_enabled: false
 
-test:
-  <<: *default_settings
-  app_name: 'transaction-processing-service (Test)'
-
-production:
-  <<: *default_settings
-
-staging:
+stg:
   <<: *default_settings
   app_name: 'transaction-processing-service (Staging)'
+  agent_enabled: false
+
+prod:
+  <<: *default_settings
+  app_name: 'transaction-processing-service (Prod)'
+  agent_enabled: true
+
+dr:
+  <<: *default_settings
+  app_name: 'transaction-processing-service (DR)'
+  agent_enabled: true

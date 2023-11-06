@@ -1,11 +1,9 @@
 kubernetes:
   protocol: HTTP
 server:
+  port: 8080
   ssl:
     enabled: false
 spring:
   profiles:
-    active: adb-dev
-  cloud:
-    config:
-      label: APE-2506-prod-preparation
+    active: adb-dr,adb-prod

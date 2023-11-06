@@ -1,0 +1,20 @@
+kubernetes:
+  protocol: HTTP
+server:
+  port: 8080
+  ssl:
+    enabled: false
+spring:
+  profiles:
+    active: adb-prod
+  cloud:
+    config:
+      label: APE-2506-prod-preparation
+datadog:
+  enabled: true
+  env: prod
+hpa:
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
+  minReplicas: 3
+  maxReplicas: 10

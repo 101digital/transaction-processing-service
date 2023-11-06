@@ -1,7 +1,3 @@
-image:
-  tag: 1.0.0-SNAPSHOT
-kubernetes:
-  protocol: HTTP
 server:
   ssl:
     enabled: false
@@ -10,6 +6,5 @@ spring:
     active: adb-stg
   cloud:
     config:
-      enabled: true
-      uri: http://configuration-service:8080/
       label: master
+#JAVA_OPTS: -Dnewrelic.environment=stg

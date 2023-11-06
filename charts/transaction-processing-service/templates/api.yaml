@@ -1,65 +1,78 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: transaction-processing-service
+  name: {{ .Release.Name }}
   labels:
-    app.kubernetes.io/instance: transaction-processing-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    tags.datadoghq.com/env: {{ .Values.datadog.env }}
+    tags.datadoghq.com/service: {{ .Release.Name }}
+    tags.datadoghq.com/version: {{ .Values.image.tag }}
 spec:
   replicas: {{ .Values.kubernetes.replicaCount | default 1 }}
   selector:
     matchLabels:
-      app: transaction-processing-service
-      run: transaction-processing-service
+      app: {{ .Release.Name }}
+      run: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: transaction-processing-service
-        run: transaction-processing-service
+        app: {{ .Release.Name }}
+        run: {{ .Release.Name }}
+        tags.datadoghq.com/env: {{ .Values.datadog.env }}
+        tags.datadoghq.com/service: {{ .Release.Name }}
+        tags.datadoghq.com/version: {{ .Values.image.tag }}
+        admission.datadoghq.com/enabled: "{{ .Values.datadog.enabled }}"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.22.0
     spec:
       {{- if .Values.affinity }}
       affinity:
         {{- toYaml .Values.affinity | nindent 8 }}
       {{- end }}
       containers:
-        - image: containers.github.acsdigital.dev/adb/transaction-processing-service:{{ .Values.image.tag }}
-          name: transaction-processing-service
+        - image: containers.github.acsdigital.dev/adb/{{ .Values.image.name }}:{{ .Values.image.tag }}
+          name: {{ .Values.image.name }}
           imagePullPolicy: {{ .Values.kubernetes.imagePullPolicy }}
           env:
             - name: SPRING_APPLICATION_JSON
               valueFrom:
                 configMapKeyRef:
-                  name: transaction-processing-service-config
+                  name:  {{ .Release.Name }}-config
                   key: config.json
+            - name: JAVA_OPTS
+              value : {{ .Values.JAVA_OPTS | default "-Dnewrelic.environment=default" }}
+            - name: DD_LOGS_INJECTION
+              value: "true"
           readinessProbe:
             failureThreshold: {{ .Values.kubernetes.readinessFailureThreshold | default 2 }}
             httpGet:
               path: {{ .Values.kubernetes.httpReadinessPath | default "/actuator/health/readiness" }}
               port: {{ ((.Values.server).port) | default 8081 }}
-              scheme: {{ .Values.kubernetes.protocol | default "HTTP" }}
+              scheme: {{ .Values.kubernetes.protocol | default "HTTP"}}
             initialDelaySeconds: {{ .Values.kubernetes.readinessDelaySecs | default 1 }}
             periodSeconds: {{ .Values.kubernetes.readinessPeriodSecs | default 30 }}
             successThreshold: {{ .Values.kubernetes.readinessSuccessThreshold | default 1 }}
-            timeoutSeconds: {{ .Values.kubernetes.readinessTimeoutSecs | default 2 }}
+            timeoutSeconds:  {{ .Values.kubernetes.readinessTimeoutSecs | default 2 }}
           livenessProbe:
             failureThreshold: {{ .Values.kubernetes.livenessFailureThreshold | default 2 }}
             httpGet:
               path: {{ .Values.kubernetes.httpLivenessPath | default "/actuator/health/liveness" }}
               port: {{ ((.Values.server).port) | default 8081 }}
-              scheme: {{ .Values.kubernetes.protocol | default "HTTP" }}
+              scheme: {{ .Values.kubernetes.protocol | default "HTTP"}}
             initialDelaySeconds: {{ .Values.kubernetes.livenessDelaySecs | default 1 }}
             periodSeconds: {{ .Values.kubernetes.livenessPeriodSecs | default 30 }}
             successThreshold: {{ .Values.kubernetes.livenessSuccessThreshold | default 1 }}
-            timeoutSeconds: {{ .Values.kubernetes.livenessTimeoutSecs | default 5 }}
+            timeoutSeconds:  {{ .Values.kubernetes.livenessTimeoutSecs | default 5 }}
           startupProbe:
             failureThreshold: {{ .Values.kubernetes.startupFailureThreshold | default 60 }}
             httpGet:
               path: {{ .Values.kubernetes.httpStartupPath | default "/actuator/health/liveness" }}
               port: {{ ((.Values.server).port) | default 8081 }}
-              scheme: {{ .Values.kubernetes.protocol | default "HTTP" }}
+              scheme: {{ .Values.kubernetes.protocol | default "HTTP"}}
             initialDelaySeconds: {{ .Values.kubernetes.startupDelaySecs | default 30 }}
             periodSeconds: {{ .Values.kubernetes.startupPeriodSecs | default 5 }}
             successThreshold: {{ .Values.kubernetes.startupSuccessThreshold | default 1 }}
-            timeoutSeconds: {{ .Values.kubernetes.startupTimeoutSecs | default 1 }}
+            timeoutSeconds:  {{ .Values.kubernetes.startupTimeoutSecs | default 1 }}
           {{ if .Values.server.ssl.enabled }}
           ports:
             - containerPort: 8080
@@ -77,6 +90,12 @@ spec:
               subPath: cacerts
               readOnly: false
           {{ end }}
+          resources:
+            limits:
+              memory: {{ .Values.kubernetes.resourcesLimitsMemory | default "2048Mi" }}
+            requests:
+              cpu: {{ .Values.kubernetes.resourcesRequestsCpu | default "0.8" }}
+              memory: {{ .Values.kubernetes.resourcesRequestsMemory | default "1024Mi" }}
       {{ if .Values.server.ssl.enabled }}
       volumes:
         - name: tomcat-ssl
@@ -101,12 +120,12 @@ metadata:
     'prometheus.io/port': '8081'
     'prometheus.io/path': '/actuator/prometheus'
   labels:
-    app.kubernetes.io/instance: transaction-processing-service
-  name: transaction-processing-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  name: {{ .Release.Name }}
 spec:
   selector:
-    app: transaction-processing-service
-    run: transaction-processing-service
+    app: {{ .Release.Name }}
+    run: {{ .Release.Name }}
   ports:
     {{ if .Values.server.ssl.enabled }}
     - name: default
@@ -131,15 +150,15 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: transaction-processing-service-config
+  name: {{ .Release.Name }}-config
   labels:
-    app.kubernetes.io/instance: transaction-processing-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
 data:
   config.json:
     '{
-        "spring.profiles.active": "{{.Values.spring.profiles.active}}",
-        "spring.cloud.config.enabled": "{{.Values.spring.cloud.config.enabled}}",
-        "spring.cloud.config.uri": "{{.Values.spring.cloud.config.uri}}",
-        "spring.cloud.config.label": "{{.Values.spring.cloud.config.label}}",
-        "spring.liquibase.enabled" : "{{.Values.spring.liquibase.enabled}}"
-       }'
+      "spring.profiles.active": "{{.Values.spring.profiles.active}}",
+      "spring.cloud.config.enabled": "{{.Values.spring.cloud.config.enabled}}",
+      "spring.cloud.config.uri": "{{.Values.spring.cloud.config.uri}}",
+      "spring.cloud.config.label": "{{.Values.spring.cloud.config.label}}",
+      "spring.liquibase.enabled" : "{{.Values.spring.liquibase.enabled}}"
+     }'

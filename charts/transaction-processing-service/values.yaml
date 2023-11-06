@@ -1,5 +1,6 @@
 image:
-  tag: 1.0.0-SNAPSHOT
+  name: transaction-processing-service
+  tag: <image-tag>
 affinity: {}
 kubernetes:
   imagePullPolicy: Always
@@ -13,3 +14,10 @@ spring:
       label: master
   liquibase:
     enabled: false
+hpa:
+  targetMemoryUtilizationPercentage: 90
+  minReplicas: 1
+  maxReplicas: 3
+datadog:
+  enabled: false
+  env: dev

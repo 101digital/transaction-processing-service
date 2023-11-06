@@ -1,5 +1,3 @@
-image:
-  tag: 1.0.0-SNAPSHOT
 kubernetes:
   protocol: HTTPS
 server:
@@ -8,7 +6,3 @@ server:
 spring:
   profiles:
     active: adb-dev
-  cloud:
-    config:
-      uri: http://configuration-service:8080/
-      label: master
