@@ -59,7 +59,6 @@ public class RoundUpContributionService {
 
     private static final String MERCHANT_CATERGORY_CODE = "merchant_category_code";
     private static final String EMPTY_VALUE = "";
-    private static final String CONSUMER_CODE = "ADB";
     private static final String TRANSACTION_TYPE = "OWN_ACCOUNTS_TRANSFER";
     private static final String ROUNDUP_SOURCE_TRANSACTION_ID = "ROUNDUP_SOURCE_TRANSACTION_ID";
     private static final String INSUFFICIENT_BALANCE_ERROR_MESSAGE =
@@ -84,6 +83,10 @@ public class RoundUpContributionService {
     @Value(
             "${transaction-processing-config.notification.roundoff-contribution-failed:roundoff-contribution-failed}")
     private String roundoffContributionFailed;
+
+    @Value(
+        "${transaction-processing-config.roundoff-contribution-consumer-code:101D}")
+    private String roundoffContributionConsumerCode;
 
     @Value(
             "${transaction-processing-config.notification.roundoff-contribution-insufficient-balance-failed:roundoff-contribution-insufficient-balance-failed}")
@@ -324,7 +327,7 @@ public class RoundUpContributionService {
                     "");
         }
         return WalletFundTransferRequest.builder()
-                .consumerCode(CONSUMER_CODE)
+                .consumerCode(roundoffContributionConsumerCode)
                 .transactionType(TRANSACTION_TYPE)
                 .transaction(
                         Transaction.builder()
