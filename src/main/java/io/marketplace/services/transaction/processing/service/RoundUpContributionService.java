@@ -73,15 +73,15 @@ public class RoundUpContributionService {
     @Value("${roundUpConfig.type:ROUNDUP_CONTRIBUTION}")
     private String roundUpConfigType;
 
-    @Value("${transaction-processing-config.contribution-param-name:contributionWalletId}")
+    @Value("${transaction-processing.contribution-param-name:contributionWalletId}")
     private String contributionWalletId;
 
     @Value(
-            "${transaction-processing-config.notification.roundoff-contribution-success:roundoff-contribution-success}")
+            "${transaction-processing.notification.roundoff-contribution-success:roundoff-contribution-success}")
     private String roundoffContributionSuccess;
 
     @Value(
-            "${transaction-processing-config.notification.roundoff-contribution-failed:roundoff-contribution-failed}")
+            "${transaction-processing.notification.roundoff-contribution-failed:roundoff-contribution-failed}")
     private String roundoffContributionFailed;
 
     @Value(
@@ -89,10 +89,10 @@ public class RoundUpContributionService {
     private String roundoffContributionConsumerCode;
 
     @Value(
-            "${transaction-processing-config.notification.roundoff-contribution-insufficient-balance-failed:roundoff-contribution-insufficient-balance-failed}")
+            "${transaction-processing.notification.roundoff-contribution-insufficient-balance-failed:roundoff-contribution-insufficient-balance-failed}")
     private String roundoffContributionInsufficientBalanceFailed;
 
-    @Value("${transaction-processing-config.notification.timezone:Asia/Kuala_Lumpur}")
+    @Value("${transaction-processing.notification.timezone:Asia/Kuala_Lumpur}")
     private String notificationTimezone;
 
     @Autowired WalletClient walletClient;
