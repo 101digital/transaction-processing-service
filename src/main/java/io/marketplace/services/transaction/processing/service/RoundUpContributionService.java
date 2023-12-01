@@ -85,7 +85,7 @@ public class RoundUpContributionService {
     private String roundoffContributionFailed;
 
     @Value(
-        "${transaction-processing-config.roundoff-contribution-consumer-code:101D}")
+        "${transaction-processing.roundoff-contribution-consumer-code:101D}")
     private String roundoffContributionConsumerCode;
 
     @Value(
