@@ -13,5 +13,7 @@
       relativeToChangelogFile="true" />
     <include file="changelog/03-drop-configuration-param-unique-constraint.xml"
       relativeToChangelogFile="true" />
+    <include file="changelog/04-add-columns-description.xml"
+      relativeToChangelogFile="true" />
 </databaseChangeLog>
 
