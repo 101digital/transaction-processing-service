@@ -3,10 +3,7 @@ info:
   title: Transaction Processing Service
   version: 1.0.0
   description: The Transaction Processing Service is responsible for the post-processing of Transactions. One example of such post processing is where an additional Round Up Transaction is generated. Users can define configurations on their wallets to execute processes after a transaction is completed.
-  x-custom-info:
-    authors:
-      name: Dasun Anushka
-      email: lakmal.thanthrige@101digital.io
+
 tags:
   - name: Configurations
     description: Manage Configuraitons
@@ -61,34 +58,34 @@ paths:
         - name: type
           required: false
           in: query
-          description: Type of the configuration
+          description: The type of round up rule configuration.
           schema:
             type: string
           example: ROUNDUP_CONTRIBUTION
         - name: walletId
           required: true
           in: query
-          description: Source Wallet id of the transaction considered to be processed
+          description: A unique identifier of the wallet.
           schema:
             type: string
           example: 18957-94517-15684-46645
         - name: pageNumber
           required: false
           in: query
-          description: Number of response page
+          description: The current page number within the paginated results.
           schema:
             type: integer
           example: 1
         - name: pageSize
           required: false
           in: query
-          description: Size of response page
+          description: The maximum number of records on a single page.
           schema:
             type: integer
           example: 10
         - name: listOrders
           in: query
-          description: Results will be sorted and ordered based on the given criteria
+          description: The criteria to sort the response data, in the format property name-sorting order.
           required: false
           schema:
             type: string
@@ -130,7 +127,7 @@ paths:
       parameters:
         - name: configurationId
           in: path
-          description: Configuration Id
+          description: A unique identifier of round up configuration rule in the context of extras parameter of the configuration rule.
           required: true
           schema:
             type: string
@@ -180,7 +177,7 @@ paths:
       parameters:
         - name: configurationId
           in: path
-          description: Configuration Id
+          description: A unique identifier of round up configuration rule in the context of extras parameter of the configuration rule.
           required: true
           schema:
             type: string
@@ -242,17 +239,17 @@ components:
       properties:
         totalRecords:
           type: integer
-          description: Number of total records in the response.
+          description: The total number of records.
           format: int64
           example: 100
         pageNumber:
           type: integer
-          description: The page number to return (starting at page 1).
+          description: The current page number within the paginated results.
           format: int32
           example: 1
         pageSize:
           type: integer
-          description: The number of records to return in a single request
+          description: The maximum number of records on a single page.
           format: int32
           example: 10
     ErrorResponse:
@@ -280,39 +277,39 @@ components:
           type: string
           format: UUID
           example: 8837e900-d8a3-487f-9092-46c0924af7db
-          description: The unique ID (primary key) for the record
+          description: A unique identifier of the roud up rule configuration.
         type:
           type: string
           example: ROUNDUP_CONTRIBUTION
-          description: Type of the configuration
+          description: The type of round up rule configuration.
         walletId:
           type: string
           example: 18763-97894-12462-76013
-          description: Source Wallet id of the transaction considered to be processed
+          description: A unique identifier of the wallet.
         logicCode:
           type: string
           example: DEFAULT
-          description: The Identifier which logic to use for the round up
+          description: The unique code indicating the logic of round up, For example, DEFAULT - round up to next decimal.
         createdBy:
           type: string
           format: UUID
           example: d43aa779-d77b-4265-960e-7b1b5fecb6ae
-          description: The user (user id) who created the record
+          description: The user who create the round up configuration rule.
         updatedby:
           type: string
           format: UUID
           example: d43aa779-d77b-4265-960e-7b1b5fecb6ae
-          description: The user (user id) who last updated the record
+          description: The user who latest updated to the round up configuration rule.
         createdAt:
           type: string
           format: date-time
           example: 2023-09-20 13:17:15.790217+00
-          description: The date & time when the record was created
+          description: The time of the round up configuration rule creation, in ISO date-time format in UTC timezone.
         updatedAt:
           type: string
           format: date-time
           example: 2023-09-20 13:17:15.790217+00
-          description: The date & time when the record was last updated
+          description: The user who latest updated to the round up configuration rule.
         supplementaryData:
           $ref: '#/components/schemas/OBSupplementaryData1'
     OBSupplementaryData1:
