@@ -33,7 +33,7 @@ import java.util.Map;
 @Component
 public class NotificationService {
 
-    @Value("${notification.entity-id:ADB}")
+    @Value("${notification.entity-id:101D}")
     private String notificationEntityId;
 
     @Value("${notification.app-id:RetailMobileApp}")
