@@ -1,7 +1,7 @@
 spring:
   application:
     name: transaction-processing-service
-    id: 160
+    id: 161
     entity-id: ADB
   mvc:
     throw-exception-if-no-handler-found: false
@@ -66,7 +66,7 @@ logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
 
 pxchange:
   enabled: true
-  entity-id: ADB
+  entity-id: 101D
 
 kafka:
   server: localhost:9092
