@@ -1,6 +1,5 @@
 package io.marketplace.services.transaction.processing.config;
 
-import io.marketplace.services.pxchange.client.config.KafkaExtraProperties;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,9 +20,6 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Value("${kafka.server}")
-    private String bootstrapServers;
-
     @Value("${kafka.group-id:scheduled-payment-group}")
     private String consumerGroupId;
 
@@ -37,7 +33,6 @@ public class KafkaConsumerConfig {
     @Bean
     public Map<String, Object> consumerConfigs(KafkaProperties kafkaProperties) {
         Map<String, Object> props = kafkaProperties.buildConsumerProperties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, KAFKA_TIMEOUT);
@@ -49,7 +44,7 @@ public class KafkaConsumerConfig {
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory(
-            KafkaProperties kafkaProperties, KafkaExtraProperties appProps) {
+            KafkaProperties kafkaProperties) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         Map<String, Object> consumerConfigs = this.consumerConfigs(kafkaProperties);
         consumerConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);

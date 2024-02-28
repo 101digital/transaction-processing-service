@@ -30,17 +30,17 @@
         <maven.deploy.plugin.version>2.8</maven.deploy.plugin.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
 
-        <marketplace.api.common.version>2.0.0-SNAPSHOT</marketplace.api.common.version>
-        <marketplace.jwt.common.version>2.0.0-SNAPSHOT</marketplace.jwt.common.version>
-        <marketplace.exception.common.version>2.0.0-SNAPSHOT</marketplace.exception.common.version>
-        <marketplace.utils.version>2.0.0-SNAPSHOT</marketplace.utils.version>
-        <marketplace.logging.common.version>2.0.0-SNAPSHOT</marketplace.logging.common.version>
-        <marketplace.logging.impl.common.version>2.0.0-SNAPSHOT</marketplace.logging.impl.common.version>
+        <marketplace.api.common.version>2.0.2</marketplace.api.common.version>
+        <marketplace.jwt.common.version>2.0.2</marketplace.jwt.common.version>
+        <marketplace.exception.common.version>2.0.2</marketplace.exception.common.version>
+        <marketplace.utils.version>2.0.2</marketplace.utils.version>
+        <marketplace.logging.common.version>2.0.2</marketplace.logging.common.version>
+        <marketplace.logging.impl.common.version>2.0.2</marketplace.logging.impl.common.version>
 
-        <partner.xchange.service.client.version>2.0.0-SNAPSHOT</partner.xchange.service.client.version>
-        <marketplace.membership.client.version>2.0.0-SNAPSHOT</marketplace.membership.client.version>
-        <notification.service.client.version>2.0.0-SNAPSHOT</notification.service.client.version>
-		<marketplace.stepup.common.version>2.0.0-SNAPSHOT</marketplace.stepup.common.version>
+        <partner.xchange.service.client.version>2.0.2</partner.xchange.service.client.version>
+        <marketplace.membership.client.version>2.0.2</marketplace.membership.client.version>
+        <notification.service.client.version>2.0.2</notification.service.client.version>
+		<marketplace.stepup.common.version>2.0.0</marketplace.stepup.common.version>
 
         <ch.qos.logback.version>1.2.7</ch.qos.logback.version>
         <ch.qos.logback.contrib.version>0.1.5</ch.qos.logback.contrib.version>

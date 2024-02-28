@@ -1,0 +1,21 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="pamitha" id="updateTableDescriptions">
+
+        <setColumnRemarks tableName="configuration" columnName="created_at" remarks="The time of the round up configuration rule creatation, in ISO date-time format in UTC timezone."/>
+        <setColumnRemarks tableName="configuration" columnName="created_by" remarks="The user who create the round up configuration rule."/>
+        <setColumnRemarks tableName="configuration" columnName="id" remarks="A unique identifier of the roud up rule configuration."/>
+        <setColumnRemarks tableName="configuration" columnName="logic_code" remarks="The unique code indicating the logic of round up, For example, DEFAULT - round up to next decimal."/>
+        <setColumnRemarks tableName="configuration" columnName="send_notification" remarks="A flag indicating whether the Platform send notification to customer or not."/>
+        <setColumnRemarks tableName="configuration" columnName="type" remarks="The type of round up rule configuration, For example, ROUNDUP_CONTRIBUTION."/>
+        <setColumnRemarks tableName="configuration" columnName="updated_at" remarks="The time when latest updated to the round up configuration rule, in ISO date-time format in UTC timzone."/>
+        <setColumnRemarks tableName="configuration" columnName="updated_by" remarks="The user who latest updated to the round up configuration ruie."/>
+        <setColumnRemarks tableName="configuration" columnName="wallet" remarks="A unique identifier of the wallet."/>
+        <setColumnRemarks tableName="configuration_param" columnName="configuration_id" remarks="A unique identifier of round up configuration rule in the context of extras parameter of the configuration rule."/>
+        <setColumnRemarks tableName="configuration_param" columnName="id" remarks="A unique identifier of the custom parameter."/>
+        <setColumnRemarks tableName="configuration_param" columnName="param_name" remarks="A code to identify custom attribute."/>
+        <setColumnRemarks tableName="configuration_param" columnName="value" remarks="The value of the paramet which depend on each difference `parameter_name`. When parameter_name is `contributionWalletId` the value is A unique identifier of the SavingsPot wallet"/>
+    </changeSet>
+</databaseChangeLog>
