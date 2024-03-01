@@ -12,6 +12,8 @@ import com.google.gson.Gson;
 import io.marketplace.commons.exception.BadRequestException;
 import io.marketplace.commons.logging.Logger;
 import io.marketplace.commons.logging.LoggerFactory;
+import io.marketplace.commons.model.dto.ErrorDto;
+import io.marketplace.commons.model.dto.ErrorResponseDto;
 import io.marketplace.commons.utils.StringUtils;
 import io.marketplace.services.transaction.processing.client.WalletClient;
 import io.marketplace.services.transaction.processing.client.dto.RequestSearchWalletDto;
@@ -33,9 +35,10 @@ import io.marketplace.services.transaction.processing.dto.openbanking.OBTransact
 import io.marketplace.services.transaction.processing.entity.ConfigurationEntity;
 import io.marketplace.services.transaction.processing.entity.ConfigurationParamEntity;
 import io.marketplace.services.transaction.processing.repository.ConfigurationRepository;
-import io.marketplace.services.transaction.processing.utils.EventTrackingService;
+import io.marketplace.services.transaction.processing.utils.Constants;
 import io.marketplace.services.transaction.processing.utils.Constants.EventCode;
 import io.marketplace.services.transaction.processing.utils.Constants.UseCase;
+import io.marketplace.services.transaction.processing.utils.EventTrackingService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,8 +87,7 @@ public class RoundUpContributionService {
             "${transaction-processing.notification.roundoff-contribution-failed:roundoff-contribution-failed}")
     private String roundoffContributionFailed;
 
-    @Value(
-        "${transaction-processing.roundoff-contribution-consumer-code:101D}")
+    @Value("${transaction-processing.roundoff-contribution-consumer-code:101D}")
     private String roundoffContributionConsumerCode;
 
     @Value(
@@ -186,9 +188,14 @@ public class RoundUpContributionService {
     }
 
     private void sendFailedPaymentNotification(
-            String errorMsg, RoundUpNotificationDetails roundUpNotificationDetails) {
-        if (errorMsg.contains(INSUFFICIENT_BALANCE_ERROR_MESSAGE)
-                || errorMsg.contains(BALANCE_BELOW_ZERO)) {
+            String requestBodyString, RoundUpNotificationDetails roundUpNotificationDetails) {
+        ErrorResponseDto errorResponseDto =
+                gson.fromJson(requestBodyString, ErrorResponseDto.class);
+        List<String> errorCodes =
+                errorResponseDto.getErrors().stream().map(ErrorDto::getCode).toList();
+        if (errorCodes.contains(Constants.INSUFFICIENT_BALANCE_ERROR_CODE)
+                || requestBodyString.contains(INSUFFICIENT_BALANCE_ERROR_MESSAGE)
+                || requestBodyString.contains(BALANCE_BELOW_ZERO)) {
             roundUpNotificationDetails.setTemplateName(
                     roundoffContributionInsufficientBalanceFailed);
             sendPaymentNotification(roundUpNotificationDetails);
@@ -250,7 +257,8 @@ public class RoundUpContributionService {
         if (!eligibleBankTransactionCodes.contains(bankTransactionCode)
                 || !validateMerchantCategoryCode(transaction)) {
             log.info(
-                    "Not Eligible for round up due to not supported bank transaction code: {} or mcc ",
+                    "Not Eligible for round up due to not supported bank transaction code: {} or"
+                            + " mcc ",
                     bankTransactionCode);
             return optConfig;
         }
