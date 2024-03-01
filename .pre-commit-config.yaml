@@ -26,3 +26,8 @@ repos:
       - id: trailing-whitespace
         args:
           - "--markdown-linebreak-ext=md"
+  - repo: https://github.com/grimwm/pre-commit-jvm
+    rev: v0.5.2
+    hooks:
+      - id: google-java-format
+        args: [--aosp]
